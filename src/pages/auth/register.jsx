@@ -4,7 +4,7 @@ import { networkAdapter } from 'config/axios-customize';
 import Toast from 'components/share/toast/Toast';
 import { REGISTRATION_MESSAGES } from 'config/constants';
 import { Formik, Form, Field } from 'formik';
-import Schemas from 'utils/validation-schemas';
+import Schemas from 'config/utils/validation-schemas';
 
 /**
  * Register Component

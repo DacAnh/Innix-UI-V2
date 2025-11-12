@@ -3,8 +3,8 @@ import PopularLocations from './components/popular-locations/popular-locations';
 import { networkAdapter } from 'config/axios-customize';
 import { useState, useEffect, useCallback } from 'react';
 import { MAX_GUESTS_INPUT_VALUE } from 'config/constants';
-import ResultsContainer from 'components/results-container/ResultsContainer';
-import { formatDate } from 'utils/date-helpers';
+import ResultsContainer from '../../components/client/hotel/results';
+import { formatDate } from 'config/utils/date-helpers';
 import { useNavigate } from 'react-router-dom';
 import _debounce from 'lodash/debounce';
 

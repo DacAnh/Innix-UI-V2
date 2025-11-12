@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { networkAdapter } from 'config/axios-customize';
-import validations from 'utils/validations';
+import validations from 'config/utils/validations';
 import Toast from 'components/share/toast/Toast';
 
 /**

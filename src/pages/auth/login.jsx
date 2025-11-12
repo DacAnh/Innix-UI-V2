@@ -2,7 +2,7 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { networkAdapter } from 'config/axios-customize';
 import { AuthContext } from 'contexts/AuthContext';
-import validations from 'utils/validations';
+import validations from 'config/utils/validations';
 import Toast from 'components/share/toast/Toast';
 import { LOGIN_MESSAGES } from 'config/constants';
 

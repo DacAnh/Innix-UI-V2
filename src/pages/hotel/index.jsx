@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import GlobalSearchBox from 'components/client/search.client';
-import ResultsContainer from 'components/results-container/ResultsContainer';
+import ResultsContainer from 'components/client/hotel/results';
 import { networkAdapter } from 'config/axios-customize';
-import isEmpty from 'utils/helpers';
+import isEmpty from '../../config/utils/helpers';
 import { MAX_GUESTS_INPUT_VALUE } from 'config/constants';
-import { formatDate } from 'utils/date-helpers';
+import { formatDate } from 'config/utils/date-helpers';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { parse } from 'date-fns';
 import PaginationController from 'components/share/pagination-controller/PaginationController';

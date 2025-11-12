@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import FinalBookingSummary from '../../routes/checkout/components/final-booking-summary/FinalBookingSummary';
+import FinalBookingSummary from './components/final-booking-summary/FinalBookingSummary';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { getReadableMonthFormat } from 'utils/date-helpers';
+import { getReadableMonthFormat } from 'config/utils/date-helpers';
 import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from 'contexts/AuthContext';
 import { useContext } from 'react';

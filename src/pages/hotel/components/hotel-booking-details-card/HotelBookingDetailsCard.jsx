@@ -6,7 +6,7 @@ import { networkAdapter } from 'config/axios-customize';
 import { DEFAULT_TAX_DETAILS } from 'config/constants';
 import { useNavigate } from 'react-router-dom';
 import queryString from 'query-string';
-import { formatPrice } from 'utils/price-helpers';
+import { formatPrice } from '../../../../config/utils/price-helpers';
 import Toast from 'components/share/toast/Toast';
 import format from 'date-fns/format';
 

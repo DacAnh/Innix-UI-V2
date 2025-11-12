@@ -1,8 +1,8 @@
-import HotelViewCard from 'components/hotel-view-card/HotelViewCard';
-import VerticalFilters from 'components/vertical-filters/VerticalFilters';
-import HotelViewCardSkeleton from 'components/hotel-view-card-skeleton/HotelViewCardSkeleton';
-import VerticalFiltersSkeleton from 'components/vertical-filters-skeleton/VerticalFiltersSkeleton';
-import EmptyHotelsState from 'components/empty-hotels-state/EmptyHotelsState';
+import HotelViewCard from 'components/client/card/hotel.card';
+import VerticalFilters from 'components/client/hotel/filters';
+import HotelViewCardSkeleton from 'components/client/card/hotel.skeleton';
+import VerticalFiltersSkeleton from 'components/client/hotel/filters.skeleton';
+import EmptyHotelsState from 'components/client/hotel/empty-state';
 import { useRef, useState } from 'react';
 import useOutsideClickHandler from 'hooks/useOutsideClickHandler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

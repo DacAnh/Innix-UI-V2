@@ -1,21 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
-import HotelsSearch from './routes/listings/HotelsSearch';
+import HotelsSearch from './pages/hotel';
 import UserProfile from './routes/user-profile/UserProfile';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
-import Home from './routes/home/Home';
+import Home from './pages/home/index';
 import { AuthProvider } from './contexts/AuthContext';
 import { makeServer } from './mirage/mirageServer';
 import HotelDetails from './routes/hotel-details/HotelDetails';
-import Login from './routes/login/Login';
-import Register from './routes/register/Register';
-import AboutUs from './routes/about-us/AboutUs';
-import BaseLayout from './routes/layouts/base-layout/BaseLayout';
-import ForgotPassword from './routes/forgot-password/ForgotPassword';
-import Checkout from 'routes/checkout/Checkout';
-import BookingConfirmation from 'routes/booking-confimation/BookingConifrmation';
+import Login from './pages/auth/login';
+import Register from './pages/auth/register';
+import AboutUs from './pages/about-us';
+import BaseLayout from './components/share/layout.app';
+import ForgotPassword from './pages/auth/forgot-password';
+import Checkout from 'pages/booking';
+import BookingConfirmation from 'pages/booking/confirmation';
 
 // if (process.env.NODE_ENV === 'development') {
 //   makeServer();

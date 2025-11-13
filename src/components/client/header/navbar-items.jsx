@@ -16,6 +16,10 @@ const NavbarItems = (onHamburgerMenuToggle) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, logout } = useContext(AuthContext);
+  // Kiểm tra xem user có phải ADMIN không
+  // Lưu ý: Cấu trúc user.role của Innix-BE trả về có thể là Object {name: "ADMIN"} hoặc String "ADMIN"
+  // Bạn cần log user ra để xem chính xác. Dưới đây là code an toàn.
+  const isAdmin = user?.role?.name === 'ADMIN' || user?.role === 'ADMIN';
 
   /**
    * Handles the logout action by calling the logout API and updating the authentication state.
@@ -90,7 +94,21 @@ const NavbarItems = (onHamburgerMenuToggle) => {
         className={`${!isAuthenticated && 'p-4 hover:bg-blue-900 md:hover:bg-brand'}`}
       >
         {isAuthenticated ? (
-          <DropdownButton triggerType="click" options={dropdownOptions} />
+          <div className="flex gap-4 items-center">
+            {/* NÚT VÀO TRANG ADMIN */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="text-brand font-bold border border-brand px-3 py-1 rounded hover:bg-brand hover:text-white transition"
+              >
+                Trang Quản Trị
+              </Link>
+            )}
+            <span>
+              Xin chào, <b>{user?.name}</b>
+            </span>
+            <DropdownButton triggerType="click" options={dropdownOptions} />
+          </div>
         ) : (
           <Link
             to="/login"

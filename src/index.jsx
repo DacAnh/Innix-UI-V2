@@ -16,6 +16,9 @@ import BaseLayout from './components/share/layout.app';
 import ForgotPassword from './pages/auth/forgot-password';
 import Checkout from 'pages/booking';
 import BookingConfirmation from 'pages/booking/confirmation';
+import LayoutAdmin from './components/admin/layout.admin';
+import Dashboard from './pages/admin/dashboard';
+import UserPage from './pages/admin/user';
 
 // if (process.env.NODE_ENV === 'development') {
 // makeServer();
@@ -67,6 +70,22 @@ const router = createBrowserRouter([
       {
         path: '/booking-confirmation',
         element: <BookingConfirmation />,
+      },
+    ],
+  },
+
+  // THÊM MỚI NHÁNH ADMIN
+  {
+    path: '/admin',
+    element: <LayoutAdmin />, // Layout riêng cho admin
+    children: [
+      {
+        index: true,
+        element: <Dashboard />,
+      },
+      {
+        path: 'user',
+        element: <UserPage />,
       },
     ],
   },

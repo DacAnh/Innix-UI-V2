@@ -1,6 +1,6 @@
 import HotelBookingDetailsCard from '../hotel-booking-details-card/HotelBookingDetailsCard';
 import UserReviews from '../user-reviews/UserReviews';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import React, { useEffect, useState } from 'react';
 import ReactImageGallery from 'react-image-gallery';
 
@@ -42,7 +42,7 @@ const HotelDetailsViewCard = ({ hotelDetails }) => {
       data: [],
     });
     const fetchHotelReviews = async () => {
-      const response = await networkAdapter.get(
+      const response = await axios.get(
         `/api/hotel/${hotelDetails.hotelCode}/reviews`,
         {
           currentPage: currentReviewsPage,

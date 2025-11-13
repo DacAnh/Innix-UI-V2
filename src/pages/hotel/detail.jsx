@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import HotelDetailsViewCard from './components/hotel-details-view-card/HotelDetailsViewCard';
 import HotelDetailsViewCardSkeleton from './components/hotel-details-view-card-skeleton/HotelDetailsViewCardSkeleton';
 
@@ -18,7 +18,7 @@ const HotelDetails = () => {
 
   useEffect(() => {
     const fetchHotelDetails = async () => {
-      const response = await networkAdapter.get(`/api/hotel/${hotelId}`);
+      const response = await axios.get(`/api/hotel/${hotelId}`);
       setHotelDetails({
         isLoading: false,
         data: response.data,

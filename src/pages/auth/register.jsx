@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import Toast from 'components/share/toast/Toast';
 import { REGISTRATION_MESSAGES } from 'config/constants';
 import { Formik, Form, Field } from 'formik';
@@ -27,16 +27,20 @@ const Register = () => {
    * @param {Object} values - The form values from Formik.
    */
   const handleSubmit = async (values) => {
-    const response = await networkAdapter.put('/api/users/register', values);
-    
+    const response = await axios.put('/api/users/register', values);
+
     if (response && response.errors && response.errors.length < 1) {
       // Bạn có thể cập nhật REGISTRATION_MESSAGES.SUCCESS trong file constants nếu muốn
-      setToastMessage('Tạo người dùng thành công. Đang chuyển đến trang đăng nhập...');
+      setToastMessage(
+        'Tạo người dùng thành công. Đang chuyển đến trang đăng nhập...'
+      );
       setShowToast(true);
       setTimeout(() => navigate('/login'), 2000);
     } else {
       setToastType('error');
-      setToastMessage(response.errors[0] || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
+      setToastMessage(
+        response.errors[0] || 'Đã có lỗi xảy ra. Vui lòng thử lại.'
+      );
       setShowToast(true);
     }
   };

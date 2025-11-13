@@ -1,114 +1,41 @@
-// Usage: import { networkAdapter } from 'path/to/NetworkAdapter.js';
-// Usage: const response = await networkAdapter.get('/api/hotel/123');
-// Usage: const response = await networkAdapter.post('/api/hotel', { name: 'Hotel Name' });
-class NetworkAdapter {
-  static #API_CONFIG = {
-    MIRAGE: window.location.origin,
-    EXPRESS: 'http://localhost:4000',
-  };
-  static #API_URL = NetworkAdapter.#API_CONFIG.MIRAGE;
-  async get(endpoint, params = {}) {
-    const endpointURL = new URL(endpoint, NetworkAdapter.#API_URL);
-    try {
-      const url = new URL(endpointURL, window.location.origin);
+import axios from 'axios';
 
-      Object.entries(params).forEach(([key, value]) => {
-        url.searchParams.append(key, value);
-      });
+const instance = axios.create({
+  baseURL: import.meta.env.VITE_BACKEND_URL, // Ví dụ: http://localhost:8080/api/v1
+  withCredentials: true, // Để nhận cookies nếu backend có gửi
+});
 
-      const response = await fetch(url.toString(), { credentials: 'include' });
-      return await response.json();
-    } catch (error) {
-      return {
-        data: {},
-        errors: [error.message],
-      };
+// Gửi Token đi kèm trong mỗi request (nếu đã đăng nhập)
+instance.interceptors.request.use(
+  function (config) {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
+    return config;
+  },
+  function (error) {
+    return Promise.reject(error);
   }
+);
 
-  async post(endpoint, data = {}) {
-    try {
-      const endpointURL = new URL(endpoint, NetworkAdapter.#API_URL);
-      const url = new URL(endpointURL, window.location.origin);
-      const response = await fetch(url.toString(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      });
-
-      return await response.json();
-    } catch (error) {
-      return {
-        data: {},
-        errors: [error.message],
-      };
+// Xử lý dữ liệu trả về (Giống abc: chỉ lấy phần data cần thiết)
+instance.interceptors.response.use(
+  function (response) {
+    // Backend trả về: { code: 1000, result: {...}, message: "..." }
+    // Chúng ta kiểm tra nếu có data thì trả về data đó
+    if (response && response.data) {
+      return response.data;
     }
-  }
-
-  async put(endpoint, data = {}) {
-    try {
-      const endpointURL = new URL(endpoint, NetworkAdapter.#API_URL);
-      const url = new URL(endpointURL, window.location.origin);
-      const response = await fetch(url.toString(), {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      });
-
-      return await response.json();
-    } catch (error) {
-      return {
-        data: {},
-        errors: [error.message],
-      };
+    return response;
+  },
+  function (error) {
+    // Xử lý lỗi tập trung (ví dụ 401 thì logout)
+    if (error?.response?.data) {
+      return error.response.data; // Trả về lỗi từ backend để frontend hiển thị
     }
+    return Promise.reject(error);
   }
+);
 
-  async delete(endpoint) {
-    try {
-      const endpointURL = new URL(endpoint, NetworkAdapter.#API_URL);
-      const url = new URL(endpointURL, window.location.origin);
-      const response = await fetch(url.toString(), {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      return await response.json();
-    } catch (error) {
-      return {
-        data: {},
-        errors: [error.message],
-      };
-    }
-  }
-
-  async patch(endpoint, data = {}) {
-    try {
-      const endpointURL = new URL(endpoint, NetworkAdapter.#API_URL);
-      const url = new URL(endpointURL, window.location.origin);
-      const response = await fetch(url.toString(), {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-        credentials: 'include',
-      });
-
-      return await response.json();
-    } catch (error) {
-      return {
-        data: {},
-        errors: [error.message],
-      };
-    }
-  }
-}
-
-export const networkAdapter = new NetworkAdapter();
+export default instance;

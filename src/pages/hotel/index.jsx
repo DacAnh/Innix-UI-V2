@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import GlobalSearchBox from 'components/client/search.client';
 import ResultsContainer from 'components/client/hotel/results';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import isEmpty from '../../config/utils/helpers';
 import { MAX_GUESTS_INPUT_VALUE } from 'config/constants';
 import { formatDate } from 'config/utils/date-helpers';
@@ -221,7 +221,7 @@ const HotelsSearch = () => {
       data: [],
       errors: [],
     });
-    const hotelsResultsResponse = await networkAdapter.get('/api/hotels', {
+    const hotelsResultsResponse = await axios.get('/api/hotels', {
       filters: JSON.stringify(filters),
       currentPage: currentResultsPage,
       advancedFilters: JSON.stringify([
@@ -242,9 +242,7 @@ const HotelsSearch = () => {
   };
 
   const getVerticalFiltersData = async () => {
-    const filtersDataResponse = await networkAdapter.get(
-      'api/hotels/verticalFilters'
-    );
+    const filtersDataResponse = await axios.get('api/hotels/verticalFilters');
     if (filtersDataResponse) {
       setFiltersData({
         isLoading: false,
@@ -274,9 +272,7 @@ const HotelsSearch = () => {
 
   // Fetches the list of available cities
   const fetchAvailableCities = async () => {
-    const availableCitiesResponse = await networkAdapter.get(
-      '/api/availableCities'
-    );
+    const availableCitiesResponse = await axios.get('/api/availableCities');
     if (availableCitiesResponse) {
       setAvailableCities(availableCitiesResponse.data.elements);
     }

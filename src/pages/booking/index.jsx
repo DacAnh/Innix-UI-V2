@@ -6,7 +6,7 @@ import { getReadableMonthFormat } from 'config/utils/date-helpers';
 import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from 'contexts/AuthContext';
 import { useContext } from 'react';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import Loader from 'components/share/loader/loader';
 import Toast from 'components/share/toast/Toast';
 
@@ -114,10 +114,7 @@ const Checkout = () => {
       isLoading: true,
       data: {},
     });
-    const response = await networkAdapter.post(
-      '/api/payments/confirmation',
-      formData
-    );
+    const response = await axios.post('/api/payments/confirmation', formData);
     if (response && response.data && response.errors.length === 0) {
       setPaymentConfirmationDetails({
         isLoading: false,
@@ -331,7 +328,9 @@ const InputField = ({
       aria-invalid={error ? 'true' : 'false'}
     />
     {error && (
-      <p className="text-red-500 text-xs my-1">Bạn cần kiểm tra lại thông tin này!</p>
+      <p className="text-red-500 text-xs my-1">
+        Bạn cần kiểm tra lại thông tin này!
+      </p>
     )}
   </div>
 );

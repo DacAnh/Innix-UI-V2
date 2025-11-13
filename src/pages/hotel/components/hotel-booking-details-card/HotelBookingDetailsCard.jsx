@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { differenceInCalendarDays } from 'date-fns';
 import DateRangePicker from 'components/share/data-range-picker/DateRangePicker';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import { DEFAULT_TAX_DETAILS } from 'config/constants';
 import { useNavigate } from 'react-router-dom';
 import queryString from 'query-string';
@@ -162,7 +162,7 @@ const HotelBookingDetailsCard = ({ hotelCode }) => {
   // Effect for fetching booking details
   useEffect(() => {
     const getBookingDetails = async () => {
-      const response = await networkAdapter.get(
+      const response = await axios.get(
         `api/hotel/${hotelCode}/booking/enquiry`
       );
       if (response && response.data) {

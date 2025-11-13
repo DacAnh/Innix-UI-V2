@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Toast from 'components/share/toast/Toast';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import Select from 'react-select';
 
 /**
@@ -60,7 +60,7 @@ const ProfileDetailsPanel = ({ userDetails }) => {
       country: nationality,
     };
     // Call the API to update the user details
-    const response = await networkAdapter.patch(
+    const response = await axios.patch(
       '/api/users/update-profile',
       updatedUserDetails
     );
@@ -100,7 +100,7 @@ const ProfileDetailsPanel = ({ userDetails }) => {
 
   useEffect(() => {
     const fetchCountries = async () => {
-      const countriesData = await networkAdapter.get('/api/misc/countries');
+      const countriesData = await axios.get('/api/misc/countries');
       if (countriesData && countriesData.data) {
         const mappedValues = countriesData.data.elements.map((country) => ({
           label: country.name,
@@ -119,7 +119,8 @@ const ProfileDetailsPanel = ({ userDetails }) => {
           Thông tin cá nhân
         </h3>
         <p className="mt-1 max-w-2xl text-gray-500">
-          Luôn cập nhật thông tin của bạn để đảm bảo liên lạc và dịch vụ liền mạch.
+          Luôn cập nhật thông tin của bạn để đảm bảo liên lạc và dịch vụ liền
+          mạch.
         </p>
       </div>
       <div className="border-t border-gray-200">
@@ -132,11 +133,7 @@ const ProfileDetailsPanel = ({ userDetails }) => {
                 value={firstName}
                 onChange={setFirstName}
               />
-              <TextField
-                label="Họ"
-                value={lastName}
-                onChange={setLastName}
-              />
+              <TextField label="Họ" value={lastName} onChange={setLastName} />
               <TextField
                 label="Số điện thoại"
                 type="tel"
@@ -230,7 +227,9 @@ const DisplayField = ({ label, value, verified }) => (
     <dt className="font-medium text-gray-500">{label}</dt>
     <dd className="mt-1 text-gray-900 sm:mt-0 sm:col-span-2">
       {value}{' '}
-      {verified && <span className="text-green-500 font-medium">(Đã xác thực)</span>}
+      {verified && (
+        <span className="text-green-500 font-medium">(Đã xác thực)</span>
+      )}
     </dd>
   </div>
 );

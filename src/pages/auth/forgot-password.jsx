@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import validations from 'config/utils/validations';
 import Toast from 'components/share/toast/Toast';
 
@@ -38,7 +38,7 @@ const ForgotPassword = () => {
     e.preventDefault();
 
     if (validations.validate('email', loginData.email)) {
-      const response = await networkAdapter.post('/api/forgot', loginData);
+      const response = await axios.post('/api/forgot', loginData);
       if (response) {
         setsuccess(true);
       } else {
@@ -102,7 +102,8 @@ const ForgotPassword = () => {
                     className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
                   />
                   <p className="text-gray-700">
-                    Chúng tôi sẽ gửi một mã xác minh đến email này nếu nó khớp với một tài khoản hiện có.
+                    Chúng tôi sẽ gửi một mã xác minh đến email này nếu nó khớp
+                    với một tài khoản hiện có.
                   </p>
                 </div>
                 {errorMessage && (

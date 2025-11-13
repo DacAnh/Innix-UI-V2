@@ -7,7 +7,7 @@ import {
   faCreditCard,
 } from '@fortawesome/free-solid-svg-icons';
 import { AuthContext } from 'contexts/AuthContext';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import { useContext } from 'react';
 import PaymentMethodsPanel from './components/PaymentsMethodsPanel';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -66,10 +66,8 @@ const UserProfile = () => {
   // effect to set initial state of user bookings data
   useEffect(() => {
     const getInitialData = async () => {
-      const userBookingsDataResponse = await networkAdapter.get(
-        '/api/users/bookings'
-      );
-      const userPaymentMethodsResponse = await networkAdapter.get(
+      const userBookingsDataResponse = await axios.get('/api/users/bookings');
+      const userPaymentMethodsResponse = await axios.get(
         'api/users/payment-methods'
       );
       if (userBookingsDataResponse && userBookingsDataResponse.data) {

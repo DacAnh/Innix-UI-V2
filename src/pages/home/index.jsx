@@ -1,6 +1,6 @@
 import HeroCover from './components/hero-cover/HeroCover';
 import PopularLocations from './components/popular-locations/popular-locations';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import { useState, useEffect, useCallback } from 'react';
 import { MAX_GUESTS_INPUT_VALUE } from 'config/constants';
 import ResultsContainer from '../../components/client/hotel/results';
@@ -108,15 +108,12 @@ const Home = () => {
      * @returns {Promise<void>} A promise that resolves when the data is fetched.
      */
     const getInitialData = async () => {
-      const popularDestinationsResponse = await networkAdapter.get(
+      const popularDestinationsResponse = await axios.get(
         '/api/popularDestinations'
       );
-      const hotelsResultsResponse =
-        await networkAdapter.get('/api/nearbyHotels');
+      const hotelsResultsResponse = await axios.get('/api/nearbyHotels');
 
-      const availableCitiesResponse = await networkAdapter.get(
-        '/api/availableCities'
-      );
+      const availableCitiesResponse = await axios.get('/api/availableCities');
       if (availableCitiesResponse) {
         setAvailableCities(availableCitiesResponse.data.elements);
       }

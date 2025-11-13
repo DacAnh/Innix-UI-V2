@@ -1,62 +1,84 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { networkAdapter } from 'config/axios-customize';
+// import axios from 'config/axios-customize';
+import { callLogin } from '../../config/api';
 import { AuthContext } from 'contexts/AuthContext';
 import validations from 'config/utils/validations';
 import Toast from 'components/share/toast/Toast';
 import { LOGIN_MESSAGES } from 'config/constants';
+import { toast } from 'react-toastify';
 
-/**
- * Login Component
- * Renders a login form allowing users to sign in to their account.
- * It handles user input for email and password, submits login credentials to the server,
- * and navigates the user to their profile upon successful authentication.
- * Displays an error message for invalid login attempts.
- */
 const Login = () => {
   const navigate = useNavigate();
-  const context = useContext(AuthContext);
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
-  });
-
+  const { login } = useContext(AuthContext);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  /**
-   * Handles input changes for the login form fields.
-   * Updates the loginData state with the field values.
-   * @param {Object} e - The event object from the input field.
-   */
-  const handleInputChange = (e) => {
-    setLoginData({ ...loginData, [e.target.name]: e.target.value });
-  };
-
-  /**
-   * Handles the submission of the login form.
-   * Attempts to authenticate the user with the provided credentials.
-   * Navigates to the user profile on successful login or sets an error message on failure.
-   * @param {Object} e - The event object from the form submission.
-   */
-  const handleLoginSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    // setErrorMessage("");
 
-    if (validations.validate('email', loginData.email)) {
-      const response = await networkAdapter.post('api/users/login', loginData);
-      if (response && response.data.token) {
-        context.triggerAuthCheck();
-        navigate('/user-profile');
-      } else if (response && response.errors.length > 0) {
-        setErrorMessage(response.errors[0]);
+    try {
+      // 1. Gọi API
+      const res = await callLogin(email, password);
+
+      // 2. LOG RA ĐỂ KIỂM TRA (Rất quan trọng khi debug)
+      console.log('Check res:', res);
+
+      // 3. Kiểm tra kết quả (SỬA LẠI CHỖ NÀY)
+      // Backend trả về 'statusCode', không phải 'code'
+      if (res && res.statusCode === 200) {
+        // 4. Lấy token (SỬA LẠI CHỖ NÀY)
+        // Token nằm trong object 'data', tên là 'access_token'
+        const accessToken = res.data?.access_token;
+        const userData = res.data?.user;
+
+        if (accessToken) {
+          localStorage.setItem('access_token', accessToken);
+
+          // 5. CẬP NHẬT CONTEXT NGAY LẬP TỨC
+          login(userData);
+          navigate('/');
+        } else {
+          setErrorMessage('Không tìm thấy Token trong phản hồi!');
+        }
+      } else {
+        // Xử lý lỗi trả về từ Backend
+
+        // 1. Kiểm tra xem message có phải là Mảng (nhiều lỗi) không?
+        if (Array.isArray(res.message)) {
+          // Sắp xếp danh sách lỗi (Sort A-Z)
+          res.message.sort((a, b) => a.localeCompare(b));
+          const errorList = (
+            <ul
+              style={{
+                listStyleType: 'none',
+                paddingLeft: '20px',
+                textAlign: 'left',
+              }}
+            >
+              {res.message.map((msg, index) => (
+                <li key={index}>{msg}</li>
+              ))}
+            </ul>
+          );
+          setErrorMessage(errorList);
+        } else {
+          // 2. Nếu message là chuỗi đơn bình thường
+          setErrorMessage(res.message);
+        }
       }
-    } else {
-      setErrorMessage(LOGIN_MESSAGES.FAILED);
+    } catch (error) {
+      setErrorMessage('Có lỗi xảy ra, vui lòng thử lại.');
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  /**
-   * Clears the current error message displayed to the user.
-   */
   const dismissError = () => {
     setErrorMessage('');
   };
@@ -66,7 +88,7 @@ const Login = () => {
       <div className="login__form">
         <div className="container mx-auto p-4 flex justify-center min-h-[600px] items-center">
           <form
-            onSubmit={handleLoginSubmit}
+            onSubmit={handleLogin}
             className="w-full max-w-lg p-4 md:p-10 shadow-md"
           >
             <div className="text-center mb-10">
@@ -82,8 +104,8 @@ const Login = () => {
                 type="email"
                 name="email"
                 placeholder="Email"
-                value={loginData.email}
-                onChange={handleInputChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="username"
                 className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
               />
@@ -93,8 +115,8 @@ const Login = () => {
                 type="password"
                 name="password"
                 placeholder="Mật khẩu"
-                value={loginData.password}
-                onChange={handleInputChange}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white"
               />

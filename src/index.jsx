@@ -18,10 +18,10 @@ import Checkout from 'pages/booking';
 import BookingConfirmation from 'pages/booking/confirmation';
 
 // if (process.env.NODE_ENV === 'development') {
-//   makeServer();
+// makeServer();
 // }
 
-makeServer();
+// makeServer();
 
 const router = createBrowserRouter([
   {

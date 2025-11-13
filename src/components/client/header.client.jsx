@@ -10,7 +10,7 @@ import NavbarItems from 'components/client/header/navbar-items';
 
 const GlobalNavbar = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
   const onHamburgerMenuToggle = () => {
     setIsVisible(!isVisible);
   };

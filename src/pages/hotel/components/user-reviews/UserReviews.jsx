@@ -2,7 +2,7 @@ import Review from './components/Review';
 import React, { useState } from 'react';
 import RatingsOverview from './components/RatingsOverview';
 import UserRatingsSelector from './components/UserRatingsSelector';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
 import Toast from 'components/share/toast/Toast';
 import PaginationController from 'components/share/pagination-controller/PaginationController';
 import Loader from 'components/share/loader/loader';
@@ -47,7 +47,7 @@ const UserReviews = ({
       return;
     }
     // TODO: Add validation for userRating and userReview
-    const response = await networkAdapter.put('/api/hotel/add-review', {
+    const response = await axios.put('/api/hotel/add-review', {
       rating: userRating,
       review: userReview,
     });
@@ -73,7 +73,9 @@ const UserReviews = ({
 
   return (
     <div className="flex flex-col p-4 border-t">
-      <h1 className="text-xl font-bold text-gray-700">Đánh giá của khách hàng</h1>
+      <h1 className="text-xl font-bold text-gray-700">
+        Đánh giá của khách hàng
+      </h1>
       <div className="flex flex-col md:flex-row py-4 bg-white shadow-sm gap-6">
         {reviewData.data.length === 0 ? (
           <div className="w-3/5">

@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DropdownButton from 'components/share/dropdown-button/DropdownButton';
-import { networkAdapter } from 'config/axios-customize';
+import axios from 'config/axios-customize';
+import { callLogout } from '../../../config/api';
 import { useContext } from 'react';
 import { AuthContext } from 'contexts/AuthContext';
 
@@ -11,18 +12,28 @@ import { AuthContext } from 'contexts/AuthContext';
  * @param {boolean} props.isAuthenticated - A flag indicating whether the user is authenticated.
  * @param {Function} props.onHamburgerMenuToggle
  */
-const NavbarItems = ({ isAuthenticated, onHamburgerMenuToggle }) => {
+const NavbarItems = (onHamburgerMenuToggle) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const context = useContext(AuthContext);
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
 
   /**
    * Handles the logout action by calling the logout API and updating the authentication state.
    */
   const handleLogout = async () => {
-    await networkAdapter.post('api/users/logout');
-    context.triggerAuthCheck();
-    navigate('/login');
+    try {
+      // 2. Gọi API Backend để xóa token/cookie phía server (nếu cần)
+      await callLogout();
+    } catch (error) {
+      console.log('Lỗi khi gọi API logout:', error);
+    } finally {
+      // 3. Gọi hàm logout của Context để xóa state và localStorage phía client
+      logout();
+
+      // 4. Chuyển hướng về trang login hoặc trang chủ
+      navigate('/login');
+      // toast.success("Đăng xuất thành công");
+    }
   };
 
   const dropdownOptions = [

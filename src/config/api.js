@@ -38,4 +38,46 @@ export const callDeleteUser = (id) => {
   return axios.delete(`/api/v2/users/${id}`);
 };
 
+// URL: /api/v2/permissions
+export const callCreatePermission = (data) => {
+  return axios.post('/api/v2/permissions', data);
+};
+
+export const callUpdatePermission = (data) => {
+  return axios.put('/api/v2/permissions', data);
+};
+
+export const callDeletePermission = (id) => {
+  return axios.delete(`/api/v2/permissions/${id}`);
+};
+
+export const callFetchPermission = (query) => {
+  // query ví dụ: page=1&size=10
+  return axios.get(`/api/v2/permissions?${query}`);
+};
+
+// ==========================
+// ROLE API
+// ==========================
+// URL: /api/v2/roles
+export const callCreateRole = (data) => {
+  return axios.post('/api/v2/roles', data);
+};
+
+export const callUpdateRole = (data) => {
+  return axios.put('/api/v2/roles', data);
+};
+
+export const callDeleteRole = (id) => {
+  return axios.delete(`/api/v2/roles/${id}`);
+};
+
+export const callFetchRole = (query) => {
+  return axios.get(`/api/v2/roles?${query}`);
+};
+
+export const callFetchRoleById = (id) => {
+  return axios.get(`/api/v2/roles/${id}`);
+};
+
 // ... các API khác

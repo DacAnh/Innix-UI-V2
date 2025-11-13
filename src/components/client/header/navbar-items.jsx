@@ -1,29 +1,33 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DropdownButton from 'components/share/dropdown-button/DropdownButton';
-import axios from 'config/axios-customize';
 import { callLogout } from '../../../config/api';
 import { useContext } from 'react';
 import { AuthContext } from 'contexts/AuthContext';
 
-/**
- * A component that renders the navigation items for the navbar for both mobile/desktop view.
- *
- * @param {Object} props - The component's props.
- * @param {boolean} props.isAuthenticated - A flag indicating whether the user is authenticated.
- * @param {Function} props.onHamburgerMenuToggle
- */
-const NavbarItems = (onHamburgerMenuToggle) => {
+const NavbarItems = ({ onHamburgerMenuToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, logout } = useContext(AuthContext);
-  // Kiểm tra xem user có phải ADMIN không
-  // Lưu ý: Cấu trúc user.role của Innix-BE trả về có thể là Object {name: "ADMIN"} hoặc String "ADMIN"
-  // Bạn cần log user ra để xem chính xác. Dưới đây là code an toàn.
-  const isAdmin = user?.role?.name === 'ADMIN' || user?.role === 'ADMIN';
 
-  /**
-   * Handles the logout action by calling the logout API and updating the authentication state.
-   */
+  // 1. Lấy danh sách permissions của user
+  const permissions = user?.role?.permissions || [];
+
+  // 2. Định nghĩa danh sách các Module thuộc về trang Admin
+  // (Bạn có thể thêm các module khác vào đây nếu sau này phát triển thêm như 'HOTELS', 'BOOKINGS'...)
+  const adminModules = [
+    'USERS',
+    'ROLES',
+    'PERMISSIONS',
+    'DASHBOARD',
+    'ACCOMMODATIONS',
+    'ROOMS',
+  ];
+
+  // 3. Kiểm tra: Nếu user có ít nhất 1 quyền thuộc các module quản trị -> Cho phép vào
+  const hasAdminAccess = permissions.some((p) =>
+    adminModules.includes(p.module)
+  );
+
   const handleLogout = async () => {
     try {
       // 2. Gọi API Backend để xóa token/cookie phía server (nếu cần)
@@ -42,18 +46,25 @@ const NavbarItems = (onHamburgerMenuToggle) => {
 
   const dropdownOptions = [
     { name: 'Trang cá nhân', onClick: () => navigate('/user-profile') },
-    { name: 'Đăng xuất', onClick: handleLogout },
   ];
 
-  /**
-   * Determines if a given path is the current active path.
-   *
-   * @param {string} path - The path to check.
-   * @returns {boolean} - True if the path is active, false otherwise.
-   */
+  // Thêm mục "Trang Quản Trị" vào giữa danh sách nếu thỏa mãn điều kiện
+  if (hasAdminAccess) {
+    dropdownOptions.push({
+      name: 'Trang quản trị',
+      onClick: () => navigate('/admin'),
+    });
+  }
+
+  // Thêm mục Đăng xuất vào cuối cùng
+  dropdownOptions.push({ name: 'Đăng xuất', onClick: handleLogout });
+
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  // Class style chung cho chữ trên menu
+  const textStyle = 'uppercase font-medium text-slate-100';
 
   return (
     <>
@@ -94,8 +105,8 @@ const NavbarItems = (onHamburgerMenuToggle) => {
         className={`${!isAuthenticated && 'p-4 hover:bg-blue-900 md:hover:bg-brand'}`}
       >
         {isAuthenticated ? (
-          <div className="flex gap-4 items-center">
-            {/* NÚT VÀO TRANG ADMIN */}
+          <div className="flex gap-4 items-center pl-5">
+            {/* NÚT VÀO TRANG ADMIN
             {isAdmin && (
               <Link
                 to="/admin"
@@ -103,8 +114,8 @@ const NavbarItems = (onHamburgerMenuToggle) => {
               >
                 Trang Quản Trị
               </Link>
-            )}
-            <span>
+            )} */}
+            <span className={`${textStyle} normal-case`}>
               Xin chào, <b>{user?.name}</b>
             </span>
             <DropdownButton triggerType="click" options={dropdownOptions} />

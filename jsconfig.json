@@ -2,17 +2,20 @@
     "compilerOptions": {
         "baseUrl": "src",
         "target": "ES6",
-    "jsx": "react",
-    "module": "commonjs",
-    "allowSyntheticDefaultImports": true
+        "jsx": "react",
+        "module": "commonjs",
+        "allowSyntheticDefaultImports": true
     },
     "include": [
-        "src"
-, "vite.config.js"    ],
-"exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    ".vscode"
-  ]
+        "src",
+        "vite.config.js"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build",
+        ".vscode",
+        "**/*.min.js", // Loại bỏ các file minified
+        "public" // Nếu public chứa file không cần check code
+    ]
 }

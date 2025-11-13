@@ -4,6 +4,7 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from '../../../config/axios-customize';
 import { callDeleteUser } from '../../../config/api'; // Import hàm xóa
 import ModalUser from '../../../components/admin/user/modal.user'; // Import Modal vừa tạo
+import Access from '../../../components/share/access';
 
 const UserPage = () => {
   const [listUser, setListUser] = useState([]);
@@ -77,29 +78,47 @@ const UserPage = () => {
       render: (_, record) => (
         <Space size="middle">
           {/* Nút Sửa */}
-          <Button
-            icon={<EditOutlined />}
-            type="primary"
-            ghost
-            onClick={() => {
-              setDataInit(record); // Gán dữ liệu dòng hiện tại vào state
-              setOpenModal(true); // Mở Modal
+          <Access
+            permission={{
+              method: 'PUT',
+              apiPath: '/api/v2/users',
+              module: 'USERS',
             }}
+            hideChildren={true}
           >
-            Sửa
-          </Button>
+            <Button
+              icon={<EditOutlined />}
+              type="primary"
+              ghost
+              onClick={() => {
+                setDataInit(record); // Gán dữ liệu dòng hiện tại vào state
+                setOpenModal(true); // Mở Modal
+              }}
+            >
+              Sửa
+            </Button>
+          </Access>
 
           {/* Nút Xóa */}
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa?"
-            onConfirm={() => handleDeleteUser(record.id)}
-            okText="Yes"
-            cancelText="No"
+          <Access
+            permission={{
+              method: 'DELETE',
+              apiPath: '/api/v2/users/{id}',
+              module: 'USERS',
+            }}
+            hideChildren={true}
           >
-            <Button icon={<DeleteOutlined />} danger>
-              Xóa
-            </Button>
-          </Popconfirm>
+            <Popconfirm
+              title="Bạn có chắc chắn muốn xóa?"
+              onConfirm={() => handleDeleteUser(record.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button icon={<DeleteOutlined />} danger>
+                Xóa
+              </Button>
+            </Popconfirm>
+          </Access>
         </Space>
       ),
     },
@@ -124,16 +143,25 @@ const UserPage = () => {
         }}
       >
         <h2>Quản lý người dùng</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            setDataInit(null); // Reset data cũ
-            setOpenModal(true); // Mở Modal thêm mới
+        <Access
+          permission={{
+            method: 'POST',
+            apiPath: '/api/v2/users',
+            module: 'USERS',
           }}
+          hideChildren={true}
         >
-          Thêm mới
-        </Button>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setDataInit(null); // Reset data cũ
+              setOpenModal(true); // Mở Modal thêm mới
+            }}
+          >
+            Thêm mới
+          </Button>
+        </Access>
       </div>
 
       <Table

@@ -8,12 +8,37 @@ import {
   Select,
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { callCreateUser, callUpdateUser } from '../../../config/api';
+import {
+  callCreateUser,
+  callUpdateUser,
+  callFetchRole,
+} from '../../../config/api';
 
 const ModalUser = (props) => {
   const { openModal, setOpenModal, fetchUser, dataInit, setDataInit } = props;
   const [isSubmit, setIsSubmit] = useState(false);
+  const [roleOptions, setRoleOptions] = useState([]); // State lưu danh sách role
   const [form] = Form.useForm();
+
+  // 1. Hàm lấy danh sách Role (Lấy hết 1 lần)
+  useEffect(() => {
+    const fetchRoles = async () => {
+      // Lấy 100 role (hoặc số lượng lớn đủ dùng)
+      const res = await callFetchRole(`page=1&size=100`);
+      if (res && res.statusCode === 200) {
+        // Map dữ liệu Role thành format cho Select của Ant Design
+        const roles = res.data.result.map((item) => ({
+          label: item.name,
+          value: item.id,
+        }));
+        setRoleOptions(roles);
+      }
+    };
+    // Gọi hàm này khi Modal mở ra
+    if (openModal) {
+      fetchRoles();
+    }
+  }, [openModal]);
 
   // === LOGIC 1: Khi mở Modal (Edit) -> Tách fullName thành firstName/lastName ===
   useEffect(() => {
@@ -36,9 +61,11 @@ const ModalUser = (props) => {
         ...dataInit,
         firstName: firstName,
         lastName: lastName,
+        // Role chỉ cần ID để Select tự map với options
+        role: dataInit.role ? dataInit.role.id : null,
       });
     }
-  }, [dataInit, openModal]);
+  }, [dataInit, openModal, roleOptions]);
 
   const handleCancel = () => {
     setOpenModal(false);
@@ -56,10 +83,13 @@ const ModalUser = (props) => {
       gender,
       address,
       phone,
+      role,
     } = values;
 
     // === LOGIC 2: Gộp firstName + lastName -> fullName để gửi Backend ===
     const fullName = `${lastName} ${firstName}`.trim();
+    // Role lúc này là ID (value), cần bọc vào object roleUser
+    const roleUser = role ? { id: role } : null;
 
     setIsSubmit(true);
 
@@ -67,11 +97,12 @@ const ModalUser = (props) => {
       // === UPDATE USER ===
       const userUpdate = {
         id: dataInit.id,
-        fullName: fullName, // ✅ Gửi đúng key 'fullName' khớp với Entity User Backend
+        fullName: fullName,
         age,
         gender,
         address,
         phone,
+        roleUser, // Gửi roleUser update
       };
 
       const res = await callUpdateUser(userUpdate);
@@ -88,13 +119,14 @@ const ModalUser = (props) => {
     } else {
       // === CREATE USER ===
       const userCreate = {
-        fullName: fullName, // ✅ Gửi key 'fullName' thay vì 'name'
+        fullName: fullName,
         email,
         password,
         age,
         gender,
         address,
         phone,
+        roleUser,
       };
       const res = await callCreateUser(userCreate);
       if (res && res.statusCode === 201) {
@@ -189,6 +221,18 @@ const ModalUser = (props) => {
             </Select>
           </Form.Item>
         </div>
+
+        <Form.Item
+          label="Vai trò"
+          name="role"
+          rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
+        >
+          <Select
+            placeholder="Chọn vai trò"
+            allowClear
+            options={roleOptions} // Truyền danh sách Role đã fetch
+          />
+        </Form.Item>
 
         <Form.Item label="Số điện thoại" name="phone">
           <Input />

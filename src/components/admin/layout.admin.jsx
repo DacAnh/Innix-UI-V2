@@ -8,13 +8,16 @@ import {
   MenuUnfoldOutlined,
   HeartOutlined,
   DollarOutlined,
+  ExceptionOutlined,
+  ApiOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar } from 'antd';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { callLogout } from '../../config/api';
-import './layout.admin.scss'; // Chúng ta sẽ tạo file css này sau
+import './layout.admin.scss';
 
 const { Header, Sider, Content, Footer } = Layout;
 
@@ -43,16 +46,25 @@ const LayoutAdmin = () => {
       icon: <AppstoreOutlined />,
     },
     {
-      label: <Link to="/admin/user">Manage Users</Link>,
+      label: <Link to="/admin/user">Quản lý người dùng</Link>,
       key: 'user',
       icon: <UserOutlined />,
     },
     {
-      label: <Link to="/admin/hotel">Manage Hotels</Link>, // Ví dụ thêm
+      label: <Link to="/admin/hotel">Quản lý nơi ở</Link>, // Ví dụ thêm
       key: 'hotel',
       icon: <FileTextOutlined />,
     },
-    // Bạn có thể thêm Role/Permission giống abc ở đây sau
+    {
+      label: <Link to="/admin/permission">Quản lý quyền</Link>,
+      key: '/admin/permission',
+      icon: <TeamOutlined />,
+    },
+    {
+      label: <Link to="/admin/role">Quản lý vai trò</Link>,
+      key: '/admin/role',
+      icon: <SafetyCertificateOutlined />,
+    },
   ];
 
   // Menu dropdown cho Avatar

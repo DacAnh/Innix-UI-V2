@@ -45,9 +45,11 @@ export const AuthProvider = ({ children }) => {
         // Kiểm tra kết quả trả về từ API getAccount
         // Bạn cần check cấu trúc response của API này (dự đoán là res.data hoặc res.result)
         if (res && res.statusCode === 200) {
-          // Giả sử dữ liệu user nằm trong res.data
-          setUser(res.data);
-          setIsAuthenticated(true);
+          const userFromApi = res.data?.user;
+          if (userFromApi) {
+            setUser(userFromApi);
+            setIsAuthenticated(true);
+          }
         }
       } catch (error) {
         // Nếu token hết hạn hoặc lỗi thì logout luôn

@@ -7,7 +7,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
 import Home from './pages/home/index';
 import { AuthProvider } from './contexts/AuthContext';
-import { makeServer } from './mirage/mirageServer';
 import HotelDetails from './pages/hotel/detail';
 import Login from './pages/auth/login';
 import Register from './pages/auth/register';
@@ -19,6 +18,9 @@ import BookingConfirmation from 'pages/booking/confirmation';
 import LayoutAdmin from './components/admin/layout.admin';
 import Dashboard from './pages/admin/dashboard';
 import UserPage from './pages/admin/user';
+import RolePage from './pages/admin/role';
+import PermissionPage from './pages/admin/permission';
+import ProtectedRoute from './components/share/protected-route.ts/index';
 
 // if (process.env.NODE_ENV === 'development') {
 // makeServer();
@@ -77,7 +79,11 @@ const router = createBrowserRouter([
   // THÊM MỚI NHÁNH ADMIN
   {
     path: '/admin',
-    element: <LayoutAdmin />, // Layout riêng cho admin
+    element: (
+      <ProtectedRoute>
+        <LayoutAdmin />
+      </ProtectedRoute>
+    ), // Layout riêng cho admin
     children: [
       {
         index: true,
@@ -86,6 +92,14 @@ const router = createBrowserRouter([
       {
         path: 'user',
         element: <UserPage />,
+      },
+      {
+        path: 'role',
+        element: <RolePage />,
+      },
+      {
+        path: 'permission',
+        element: <PermissionPage />,
       },
     ],
   },
@@ -97,7 +111,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </AuthProvider>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

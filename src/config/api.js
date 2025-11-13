@@ -8,10 +8,6 @@ export const callLogin = (email, password) => {
   });
 };
 
-export const callRegister = (userData) => {
-  return axios.post('/users', userData);
-};
-
 // Thêm hàm này để lấy thông tin user khi F5 trang
 export const callFetchAccount = () => {
   return axios.get('/api/v2/auth/account');
@@ -19,6 +15,12 @@ export const callFetchAccount = () => {
 
 export const callLogout = () => {
   return axios.post('/api/v2/auth/logout');
+};
+
+// API Đăng ký tài khoản
+export const callRegister = (userData) => {
+  // userData là object chứa: { name, email, password, age, gender, address, phone }
+  return axios.post('/api/v2/auth/register', userData);
 };
 
 // ... các API khác

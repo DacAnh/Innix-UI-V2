@@ -40,7 +40,8 @@ const HeroCover = (props) => {
             Khám phá nơi ở hoàn hảo của bạn trên Việt Nam
           </h3>
           <p className="my-1">
-            Nhập ngày của bạn để xem giá mới nhất và bắt đầu hành trình thư giãn và phiêu lưu ngay hôm nay.
+            Nhập ngày của bạn để xem giá mới nhất và bắt đầu hành trình thư giãn
+            và phiêu lưu ngay hôm nay.
           </p>
         </div>
         <GlobalSearchBox

@@ -67,12 +67,15 @@ const BookingConfirmation = () => {
           <FontAwesomeIcon icon={faStar} className="text-brand text-3xl" />
           <FontAwesomeIcon icon={faStar} className="text-brand text-xl" />
         </div>
-        <h1 className="text-gray-700 text-2xl font-bold">Đặt Phòng Thành Công</h1>
+        <h1 className="text-gray-700 text-2xl font-bold">
+          Đặt Phòng Thành Công
+        </h1>
         <p className="text-gray-600 mt-2">
           Cảm ơn bạn đã đặt phòng! Yêu cầu của bạn đã được xác nhận.
         </p>
         <p className="text-gray-600">
-          Vui lòng kiểm tra email để xem chi tiết đặt phòng và hướng dẫn cho kỳ nghỉ của bạn.
+          Vui lòng kiểm tra email để xem chi tiết đặt phòng và hướng dẫn cho kỳ
+          nghỉ của bạn.
         </p>
         <div className="mt-4 flex justify-center flex-wrap items-center">
           {bookingDetails &&

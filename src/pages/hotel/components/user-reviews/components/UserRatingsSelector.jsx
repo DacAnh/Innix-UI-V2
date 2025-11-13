@@ -33,7 +33,9 @@ const UserRatingsSelector = ({
         isEmpty ? 'md:w-full' : 'md:w-2/5'
       } pl-0 md:pl-4 md:border-l flex flex-col items-center justify-center`}
     >
-      <div className="text-lg font-semibold text-gray-700">Đánh giá của bạn</div>
+      <div className="text-lg font-semibold text-gray-700">
+        Đánh giá của bạn
+      </div>
       <div className="flex">
         {[1, 2, 3, 4, 5].map((star) => (
           <FontAwesomeIcon

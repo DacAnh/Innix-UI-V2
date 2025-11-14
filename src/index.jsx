@@ -20,6 +20,7 @@ import Dashboard from './pages/admin/dashboard';
 import UserPage from './pages/admin/user';
 import RolePage from './pages/admin/role';
 import PermissionPage from './pages/admin/permission';
+import AccommodationTypePage from './pages/admin/accommodation-type';
 import ProtectedRoute from './components/share/protected-route.ts/index';
 
 // if (process.env.NODE_ENV === 'development') {
@@ -100,6 +101,10 @@ const router = createBrowserRouter([
       {
         path: 'permission',
         element: <PermissionPage />,
+      },
+      {
+        path: 'accommodation-type',
+        element: <AccommodationTypePage />,
       },
     ],
   },

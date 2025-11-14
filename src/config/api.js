@@ -80,4 +80,26 @@ export const callFetchRoleById = (id) => {
   return axios.get(`/api/v2/roles/${id}`);
 };
 
+// === ACCOMMODATION TYPE API ===
+// URL: /api/v2/accommodation-types
+export const callCreateAccommodationType = (data) => {
+  return axios.post('/api/v2/accommodation-types', data);
+};
+
+export const callUpdateAccommodationType = (data, id) => {
+  return axios.put(`/api/v2/accommodation-types/${id}`, data);
+};
+
+export const callDeleteAccommodationType = (id) => {
+  return axios.delete(`/api/v2/accommodation-types/${id}`);
+};
+
+export const callFetchAccommodationType = (query) => {
+  return axios.get(`/api/v2/accommodation-types?${query}`);
+};
+
+export const callFetchAccommodationTypeById = (id) => {
+  return axios.get(`/api/v2/accommodation-types/${id}`);
+};
+
 // ... các API khác

@@ -51,8 +51,8 @@ const LayoutAdmin = () => {
       icon: <UserOutlined />,
     },
     {
-      label: <Link to="/admin/hotel">Quản lý nơi ở</Link>,
-      key: 'hotel',
+      label: <Link to="/admin/accommodation-type">Loại hình lưu trú</Link>,
+      key: 'accommodation-type',
       icon: <FileTextOutlined />,
     },
     {

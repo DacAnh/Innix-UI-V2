@@ -62,7 +62,7 @@ const ModalUser = (props) => {
         firstName: firstName,
         lastName: lastName,
         // Role chỉ cần ID để Select tự map với options
-        role: dataInit.role ? dataInit.role.id : null,
+        role: dataInit.roleUser ? dataInit.roleUser.id : null,
       });
     }
   }, [dataInit, openModal, roleOptions]);
@@ -89,7 +89,7 @@ const ModalUser = (props) => {
     // === LOGIC 2: Gộp firstName + lastName -> fullName để gửi Backend ===
     const fullName = `${lastName} ${firstName}`.trim();
     // Role lúc này là ID (value), cần bọc vào object roleUser
-    const roleUser = role ? { id: role } : null;
+    const roleUserObj = role ? { id: role } : null;
 
     setIsSubmit(true);
 
@@ -102,7 +102,7 @@ const ModalUser = (props) => {
         gender,
         address,
         phone,
-        roleUser, // Gửi roleUser update
+        roleUser: roleUserObj, // Gửi roleUser update
       };
 
       const res = await callUpdateUser(userUpdate);
@@ -126,7 +126,7 @@ const ModalUser = (props) => {
         gender,
         address,
         phone,
-        roleUser,
+        roleUser: roleUserObj,
       };
       const res = await callCreateUser(userCreate);
       if (res && res.statusCode === 201) {

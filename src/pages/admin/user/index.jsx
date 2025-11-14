@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from '../../../config/axios-customize';
 import { callDeleteUser } from '../../../config/api'; // Import hàm xóa
-import ModalUser from '../../../components/admin/user/modal.user'; // Import Modal vừa tạo
+import ModalUser from '../../../components/admin/user/modal.user';
 import Access from '../../../components/share/access';
 
 const UserPage = () => {
@@ -12,7 +12,7 @@ const UserPage = () => {
 
   // Pagination State
   const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
 
   // Modal State
@@ -69,8 +69,10 @@ const UserPage = () => {
     },
     {
       title: 'Vai trò',
-      dataIndex: 'role',
-      render: (role) => role?.name || 'USER',
+      dataIndex: 'roleUser',
+      render: (text, record) => {
+        return record.roleUser?.name ?? 'USER';
+      },
     },
     {
       title: 'Hành động',

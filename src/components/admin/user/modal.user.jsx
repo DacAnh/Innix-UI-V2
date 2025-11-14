@@ -102,7 +102,7 @@ const ModalUser = (props) => {
         gender,
         address,
         phone,
-        roleUser: roleUserObj, // Gửi roleUser update
+        roleUser: roleUserObj,
       };
 
       const res = await callUpdateUser(userUpdate);
@@ -227,11 +227,7 @@ const ModalUser = (props) => {
           name="role"
           rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
         >
-          <Select
-            placeholder="Chọn vai trò"
-            allowClear
-            options={roleOptions} // Truyền danh sách Role đã fetch
-          />
+          <Select placeholder="Chọn vai trò" allowClear options={roleOptions} />
         </Form.Item>
 
         <Form.Item label="Số điện thoại" name="phone">

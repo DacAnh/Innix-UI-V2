@@ -1,28 +1,5 @@
 import React from 'react';
 
-/**
- * PaginationController component for paginating search results.
- * @param {Object} props - The component props.
- * @param {number} props.currentPage - The current page number.
- * @param {number} props.totalPages - The total number of pages.
- * @param {Function} props.handlePageChange - The function to handle page change.
- * @param {Function} props.handlePreviousPageChange - The function to handle previous page change.
- * @param {Function} props.handleNextPageChange - The function to handle next page change.
- *
- * @returns {JSX.Element} The rendered component.
- *
- * @example
- * return (
- *  <PaginationController
- *   currentPage={currentPage}
- *   totalPages={totalPages}
- *   handlePageChange={handlePageChange}
- *   handlePreviousPageChange={handlePreviousPageChange}
- *   handleNextPageChange={handleNextPageChange}
- *  />
- * );
- *
- */
 const PaginationController = (props) => {
   const {
     currentPage,

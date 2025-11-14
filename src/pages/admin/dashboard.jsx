@@ -3,7 +3,7 @@ import { UserOutlined, DollarOutlined } from '@ant-design/icons';
 import CountUp from 'react-countup';
 
 const Dashboard = () => {
-  // Cấu hình formatter để Ant Design dùng CountUp hiển thị số
+  // Cấu hình formatter để dùng CountUp hiển thị số
   const formatter = (value) => (
     <CountUp end={value} separator="," duration={2.5} />
   );

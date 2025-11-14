@@ -1,10 +1,10 @@
 import axios from './axios-customize';
 
-// Định nghĩa hàm login khớp với UserLoginRequest của Backend
+// Login
 export const callLogin = (email, password) => {
   return axios.post('/api/v2/auth/login', {
-    email, // Khớp với field 'email' trong UserLoginRequest.java
-    password, // Khớp với field 'password' trong UserLoginRequest.java
+    email,
+    password,
   });
 };
 

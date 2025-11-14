@@ -1,15 +1,6 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-/**
- * Toast Component
- * Displays a toast message with a dismiss button.
- *
- * @param {Object} props - Props for the component.
- * @param {string} props.type - The type of toast message.
- * @param {string} props.message - The message to display in the toast.
- * @param {Function} props.dismissError - The function to dismiss the toast message.
- */
 const Toast = ({ type, message, dismissError }) => {
   const typeToClassMap = {
     error: 'bg-red-100 border-l-4 border-red-500 text-red-700',

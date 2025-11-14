@@ -12,7 +12,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Khởi tạo State chứa toàn bộ dữ liệu form khớp với Backend UserRegistrationRequest
+  // Khởi tạo State chứa toàn bộ dữ liệu form
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -58,7 +58,7 @@ const Register = () => {
 
       // 4. Xử lý kết quả
       if (res && res.statusCode === 201) {
-        // Thường tạo mới trả về 201, hoặc 200 tùy code backend bạn
+        // Thường tạo mới trả về 201, hoặc 200 tùy code backend
         toast.success('Đăng ký tài khoản thành công!');
         navigate('/login');
       } else {
@@ -103,7 +103,7 @@ const Register = () => {
     }
   };
 
-  // Bộ class style dùng chung cho các ô input (lấy từ code cũ của bạn)
+  // Bộ class style dùng chung cho các ô input
   const inputClass =
     'appearance-none block w-full px-4 py-3 mb leading-tight text-gray-700 bg-gray-200 rounded focus:outline-none focus:bg-white border';
 
@@ -171,7 +171,7 @@ const Register = () => {
                 />
               </div>
 
-              {/* --- TUỔI & GIỚI TÍNH (Mới thêm cho khớp Backend) --- */}
+              {/* --- TUỔI & GIỚI TÍNH --- */}
               <div className="flex flex-wrap mb-6 -mx-3">
                 <div className="w-full px-3 mb-6 md:w-1/2 md:mb-0">
                   <input
@@ -198,7 +198,7 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* --- ĐỊA CHỈ (Mới thêm cho khớp Backend) --- */}
+              {/* --- ĐỊA CHỈ --- */}
               <div className="mb-6">
                 <input
                   name="address"

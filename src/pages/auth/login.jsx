@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// import axios from 'config/axios-customize';
 import { callLogin } from '../../config/api';
 import { AuthContext } from 'contexts/AuthContext';
 import validations from 'config/utils/validations';

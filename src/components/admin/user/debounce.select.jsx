@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Select, Spin } from 'antd';
-import debounce from 'lodash/debounce'; // Nhớ cài lodash nếu chưa có: npm i lodash
+import debounce from 'lodash/debounce';
 
 const DebounceSelect = ({ fetchOptions, debounceTimeout = 800, ...props }) => {
   const [fetching, setFetching] = useState(false);

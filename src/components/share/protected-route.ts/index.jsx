@@ -6,8 +6,8 @@ import NotPermitted from './not-permitted';
 const ProtectedRoute = (props) => {
   const { isAuthenticated, user } = useContext(AuthContext);
 
-  // Kiểm tra quyền Admin (Giống logic ở Navbar)
-  // Bạn có thể mở rộng logic này: Check permission cụ thể thay vì check role
+  // Kiểm tra quyền Admin
+  // Có thể mở rộng logic này: Check permission cụ thể thay vì check role
   const isAdminRoute = window.location.pathname.startsWith('/admin');
   const permissions = user?.role?.permissions || [];
   const adminModules = [

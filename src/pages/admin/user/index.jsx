@@ -2,7 +2,7 @@ import { Table, Button, Space, Popconfirm, message, notification } from 'antd';
 import { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import axios from '../../../config/axios-customize';
-import { callDeleteUser } from '../../../config/api'; // Import hàm xóa
+import { callDeleteUser } from '../../../config/api';
 import ModalUser from '../../../components/admin/user/modal.user';
 import Access from '../../../components/share/access';
 

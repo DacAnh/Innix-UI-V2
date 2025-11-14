@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const res = await callFetchAccount();
         // Kiểm tra kết quả trả về từ API getAccount
-        // Bạn cần check cấu trúc response của API này (dự đoán là res.data hoặc res.result)
+        // Cần check cấu trúc response của API này
         if (res && res.statusCode === 200) {
           const userFromApi = res.data?.user;
           if (userFromApi) {

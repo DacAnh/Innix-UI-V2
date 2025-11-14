@@ -43,7 +43,7 @@ const ModalRole = (props) => {
         name: dataInit.name,
         description: dataInit.description,
         active: dataInit.active,
-        permissions: dataInit.permissions?.map((p) => p.id), // Chỉ lấy mảng ID
+        permissions: dataInit.permissions?.map((p) => p.id),
       });
     } else {
       form.resetFields();
@@ -214,7 +214,7 @@ const PermissionSelection = ({ value = [], onChange, listPermissions }) => {
             <Row>
               {perms.map((p) => (
                 <Col span={12} key={p.id} style={{ marginBottom: 10 }}>
-                  {/* Checkbox đơn lẻ tự quản lý checked */}
+                  {/* Checkbox đơn lẻ*/}
                   <Checkbox
                     checked={value.includes(p.id)}
                     onChange={(e) => onSingleCheck(p.id, e.target.checked)}

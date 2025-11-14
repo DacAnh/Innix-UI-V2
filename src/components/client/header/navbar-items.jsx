@@ -13,7 +13,7 @@ const NavbarItems = ({ onHamburgerMenuToggle }) => {
   const permissions = user?.role?.permissions || [];
 
   // 2. Định nghĩa danh sách các Module thuộc về trang Admin
-  // (Bạn có thể thêm các module khác vào đây nếu sau này phát triển thêm như 'HOTELS', 'BOOKINGS'...)
+  // (Có thể thêm các module khác vào đây nếu sau này phát triển thêm như 'HOTELS', 'BOOKINGS'...)
   const adminModules = [
     'USERS',
     'ROLES',
@@ -40,7 +40,6 @@ const NavbarItems = ({ onHamburgerMenuToggle }) => {
 
       // 4. Chuyển hướng về trang login hoặc trang chủ
       navigate('/login');
-      // toast.success("Đăng xuất thành công");
     }
   };
 
@@ -106,15 +105,6 @@ const NavbarItems = ({ onHamburgerMenuToggle }) => {
       >
         {isAuthenticated ? (
           <div className="flex gap-4 items-center pl-5">
-            {/* NÚT VÀO TRANG ADMIN
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="text-brand font-bold border border-brand px-3 py-1 rounded hover:bg-brand hover:text-white transition"
-              >
-                Trang Quản Trị
-              </Link>
-            )} */}
             <span className={`${textStyle} normal-case`}>
               Xin chào, <b>{user?.name}</b>
             </span>

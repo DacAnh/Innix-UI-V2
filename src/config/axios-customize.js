@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL, // Ví dụ: http://localhost:8080/api/v1
+  baseURL: import.meta.env.VITE_BACKEND_URL, // Ví dụ: http://localhost:8080/api/v2
   withCredentials: true, // Để nhận cookies nếu backend có gửi
 });
 
@@ -19,10 +19,9 @@ instance.interceptors.request.use(
   }
 );
 
-// Xử lý dữ liệu trả về (Giống abc: chỉ lấy phần data cần thiết)
+// Xử lý dữ liệu trả về (Chỉ lấy phần data cần thiết)
 instance.interceptors.response.use(
   function (response) {
-    // Backend trả về: { code: 1000, result: {...}, message: "..." }
     // Chúng ta kiểm tra nếu có data thì trả về data đó
     if (response && response.data) {
       return response.data;

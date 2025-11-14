@@ -102,4 +102,21 @@ export const callFetchAccommodationTypeById = (id) => {
   return axios.get(`/api/v2/accommodation-types/${id}`);
 };
 
+// === FILE UPLOAD API ===
+// Upload file đơn lẻ
+export const callUploadFile = (file, folder = 'others') => {
+  const bodyFormData = new FormData();
+  bodyFormData.append('file', file);
+  bodyFormData.append('folder', folder);
+
+  return axios({
+    method: 'post',
+    url: '/api/v2/files',
+    data: bodyFormData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 // ... các API khác

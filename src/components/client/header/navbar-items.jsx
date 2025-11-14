@@ -1,44 +1,49 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import DropdownButton from 'components/share/dropdown-button/DropdownButton';
-import { callLogout } from '../../../config/api';
-import { useContext } from 'react';
-import { AuthContext } from 'contexts/AuthContext';
+import DropdownButton from '../../share/dropdown-button/DropdownButton';
+import { callLogout, callFetchAccommodationType } from '../../../config/api';
+import { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '../../../contexts/AuthContext';
 
 const NavbarItems = ({ onHamburgerMenuToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, logout } = useContext(AuthContext);
+  const [accommodationTypes, setAccommodationTypes] = useState([]);
 
-  // 1. Lấy danh sách permissions của user
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const res = await callFetchAccommodationType('page=1&size=100');
+        if (res && res.statusCode === 200) {
+          setAccommodationTypes(res.data.result);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchTypes();
+  }, []);
+
   const permissions = user?.role?.permissions || [];
-
-  // 2. Định nghĩa danh sách các Module thuộc về trang Admin
-  // (Có thể thêm các module khác vào đây nếu sau này phát triển thêm như 'HOTELS', 'BOOKINGS'...)
   const adminModules = [
     'USERS',
     'ROLES',
     'PERMISSIONS',
     'DASHBOARD',
     'ACCOMMODATIONS',
-    'ROOMS',
+    'ACCOMMODATION_TYPES',
   ];
-
-  // 3. Kiểm tra: Nếu user có ít nhất 1 quyền thuộc các module quản trị -> Cho phép vào
-  const hasAdminAccess = permissions.some((p) =>
-    adminModules.includes(p.module)
+  const hasAdminAccess = permissions.some(
+    (p) => p.module && adminModules.includes(p.module.trim())
   );
 
   const handleLogout = async () => {
     try {
-      // 2. Gọi API Backend để xóa token/cookie phía server (nếu cần)
       await callLogout();
     } catch (error) {
-      console.log('Lỗi khi gọi API logout:', error);
+      console.log(error);
     } finally {
-      // 3. Gọi hàm logout của Context để xóa state và localStorage phía client
       logout();
-
-      // 4. Chuyển hướng về trang login hoặc trang chủ
       navigate('/login');
     }
   };
@@ -46,82 +51,88 @@ const NavbarItems = ({ onHamburgerMenuToggle }) => {
   const dropdownOptions = [
     { name: 'Trang cá nhân', onClick: () => navigate('/user-profile') },
   ];
-
-  // Thêm mục "Trang Quản Trị" vào giữa danh sách nếu thỏa mãn điều kiện
   if (hasAdminAccess) {
-    dropdownOptions.push({
-      name: 'Trang quản trị',
+    dropdownOptions.unshift({
+      name: 'Trang Quản Trị',
       onClick: () => navigate('/admin'),
     });
   }
-
-  // Thêm mục Đăng xuất vào cuối cùng
   dropdownOptions.push({ name: 'Đăng xuất', onClick: handleLogout });
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+  const isActive = (path) => location.pathname === path;
 
-  // Class style chung cho chữ trên menu
   const textStyle = 'uppercase font-medium text-slate-100';
+
+  // ✅ QUAN TRỌNG:
+  // h-full: Chiếm hết chiều cao navbar (80px)
+  // flex items-center: Căn chữ vào GIỮA theo chiều dọc
+  const liStyle =
+    'h-full flex items-center px-4 hover:bg-blue-900 md:hover:bg-brand cursor-pointer transition-colors duration-200';
 
   return (
     <>
-      <li className="p-4 hover:bg-blue-900 md:hover:bg-brand">
+      {/* Trang chủ */}
+      <li className={liStyle}>
         <Link
           to="/"
-          className={`uppercase font-medium text-slate-100 hover-underline-animation ${
-            isActive('/') && 'active-link'
-          }`}
+          className={`${textStyle} hover-underline-animation ${isActive('/') && 'active-link'}`}
           onClick={onHamburgerMenuToggle}
         >
           Trang chủ
         </Link>
       </li>
-      <li className="p-4 hover:bg-blue-900 md:hover:bg-brand">
-        <Link
-          to="/hotels"
-          className={`uppercase font-medium text-slate-100 hover-underline-animation ${
-            isActive('/hotels') && 'active-link'
-          }`}
-          onClick={onHamburgerMenuToggle}
-        >
-          Khách sạn
-        </Link>
-      </li>
-      <li className="p-4 hover:bg-blue-900 md:hover:bg-brand">
+
+      {/* Loại hình động */}
+      {accommodationTypes.length > 0 &&
+        accommodationTypes.map((type) => (
+          <li key={type.id} className={liStyle}>
+            <Link
+              to={`/hotels?type=${type.id}`}
+              className={`${textStyle} hover-underline-animation ${isActive(`/hotels?type=${type.id}`) && 'active-link'}`}
+              onClick={onHamburgerMenuToggle}
+            >
+              {type.displayName}
+            </Link>
+          </li>
+        ))}
+
+      {/* Về chúng tôi */}
+      <li className={liStyle}>
         <Link
           to="/about-us"
-          className={`uppercase font-medium text-slate-100 hover-underline-animation ${
-            isActive('/about-us') && 'active-link'
-          }`}
+          className={`${textStyle} hover-underline-animation ${isActive('/about-us') && 'active-link'}`}
           onClick={onHamburgerMenuToggle}
         >
           Về chúng tôi
         </Link>
       </li>
-      <li
-        className={`${!isAuthenticated && 'p-4 hover:bg-blue-900 md:hover:bg-brand'}`}
-      >
-        {isAuthenticated ? (
-          <div className="flex gap-4 items-center pl-5">
-            <span className={`${textStyle} normal-case`}>
+
+      {/* Phần User / Đăng nhập */}
+      {isAuthenticated ? (
+        // Đã đăng nhập
+        <li className={liStyle}>
+          <div className="flex items-center gap-3">
+            <span className={`${textStyle} normal-case whitespace-nowrap`}>
               Xin chào, <b>{user?.name}</b>
             </span>
-            <DropdownButton triggerType="click" options={dropdownOptions} />
+            {/* DropdownButton tự bản thân nó phải được style chuẩn, không cần translate bên ngoài */}
+            <div className="flex items-center">
+              <DropdownButton triggerType="click" options={dropdownOptions} />
+            </div>
           </div>
-        ) : (
+        </li>
+      ) : (
+        // Chưa đăng nhập
+        <li className={liStyle}>
           <Link
             to="/login"
-            className={`uppercase font-medium text-slate-100 hover-underline-animation ${
-              isActive('/login') && 'active-link'
-            }`}
+            className={`${textStyle} hover-underline-animation ${isActive('/login') && 'active-link'}`}
             onClick={onHamburgerMenuToggle}
           >
             Đăng nhập / Đăng ký
           </Link>
-        )}
-      </li>
+        </li>
+      )}
     </>
   );
 };

@@ -27,16 +27,18 @@ const Login = () => {
       // 2. LOG RA ĐỂ KIỂM TRA (Rất quan trọng khi debug)
       console.log('Check res:', res);
 
-      // 3. Kiểm tra kết quả (SỬA LẠI CHỖ NÀY)
+      // 3. Kiểm tra kết quả
       // Backend trả về 'statusCode', không phải 'code'
       if (res && res.statusCode === 200) {
-        // 4. Lấy token (SỬA LẠI CHỖ NÀY)
+        // 4. Lấy token
         // Token nằm trong object 'data', tên là 'access_token'
         const accessToken = res.data?.access_token;
         const userData = res.data?.user;
 
         if (accessToken) {
           localStorage.setItem('access_token', accessToken);
+          //Lưu thông tin user vào localStorage
+          localStorage.setItem('innix_user', JSON.stringify(userData));
 
           // 5. CẬP NHẬT CONTEXT NGAY LẬP TỨC
           login(userData);

@@ -28,13 +28,17 @@ const ModalRole = (props) => {
   // 1. Lấy tất cả Permission về để hiển thị list checkbox
   useEffect(() => {
     const fetchPermissions = async () => {
-      const res = await callFetchPermission(`page=1&size=1000`); // Lấy max 1000 cái
+      const res = await callFetchPermission(`page=1&size=1000`);
       if (res && res.statusCode === 200) {
         setListPermissions(res.data.result);
       }
     };
-    fetchPermissions();
-  }, []);
+
+    // Chỉ gọi API khi Modal được yêu cầu MỞ RA
+    if (openModal) {
+      fetchPermissions();
+    }
+  }, [openModal]);
 
   // 2. Fill dữ liệu khi Sửa
   useEffect(() => {

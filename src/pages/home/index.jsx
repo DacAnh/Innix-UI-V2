@@ -102,39 +102,39 @@ const Home = () => {
     });
   };
 
-  useEffect(() => {
-    /**
-     * Fetches initial data for the Home route.
-     * @returns {Promise<void>} A promise that resolves when the data is fetched.
-     */
-    const getInitialData = async () => {
-      const popularDestinationsResponse = await axios.get(
-        '/api/popularDestinations'
-      );
-      const hotelsResultsResponse = await axios.get('/api/nearbyHotels');
+  // useEffect(() => {
+  //   /**
+  //    * Fetches initial data for the Home route.
+  //    * @returns {Promise<void>} A promise that resolves when the data is fetched.
+  //    */
+  //   const getInitialData = async () => {
+  //     const popularDestinationsResponse = await axios.get(
+  //       '/api/popularDestinations'
+  //     );
+  //     const hotelsResultsResponse = await axios.get('/api/nearbyHotels');
 
-      const availableCitiesResponse = await axios.get('/api/availableCities');
-      if (availableCitiesResponse) {
-        setAvailableCities(availableCitiesResponse.data.elements);
-      }
+  //     const availableCitiesResponse = await axios.get('/api/availableCities');
+  //     if (availableCitiesResponse) {
+  //       setAvailableCities(availableCitiesResponse.data.elements);
+  //     }
 
-      if (popularDestinationsResponse) {
-        setPopularDestinationsData({
-          isLoading: false,
-          data: popularDestinationsResponse.data.elements,
-          errors: popularDestinationsResponse.errors,
-        });
-      }
-      if (hotelsResultsResponse) {
-        setHotelsResults({
-          isLoading: false,
-          data: hotelsResultsResponse.data.elements,
-          errors: hotelsResultsResponse.errors,
-        });
-      }
-    };
-    getInitialData();
-  }, []);
+  //     if (popularDestinationsResponse) {
+  //       setPopularDestinationsData({
+  //         isLoading: false,
+  //         data: popularDestinationsResponse.data.elements,
+  //         errors: popularDestinationsResponse.errors,
+  //       });
+  //     }
+  //     if (hotelsResultsResponse) {
+  //       setHotelsResults({
+  //         isLoading: false,
+  //         data: hotelsResultsResponse.data.elements,
+  //         errors: hotelsResultsResponse.errors,
+  //       });
+  //     }
+  //   };
+  //   getInitialData();
+  // }, []);
 
   return (
     <>

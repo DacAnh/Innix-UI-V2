@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { notification } from 'antd';
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL, // Ví dụ: http://localhost:8080/api/v2
@@ -29,10 +30,37 @@ instance.interceptors.response.use(
     return response;
   },
   function (error) {
-    // Xử lý lỗi tập trung (ví dụ 401 thì logout)
-    if (error?.response?.data) {
-      return error.response.data; // Trả về lỗi từ backend để frontend hiển thị
+    // Lấy data và status từ lỗi
+    const data = error?.response?.data;
+    const status = error?.response?.status;
+
+    // 2. Xử lý lỗi 403 (Access Denied - Cấm truy cập)
+    if (status === 403 && data) {
+      // Hiển thị thông báo lỗi 403 toàn cục
+      notification.error({
+        message: data.error || 'Không có quyền',
+        description:
+          data.message || 'Bạn không có quyền thực hiện hành động này.',
+      });
+      // Vẫn trả về data để logic ở component (nếu có) không bị crash
+      return data;
     }
+
+    // Xử lý lỗi 401 (Unauthorized - Chưa xác thực)
+    // (Bạn có thể thêm logic logout ở đây nếu cần)
+    if (status === 401 && data) {
+      notification.error({
+        message: data.error || 'Lỗi xác thực',
+        description: data.message || 'Vui lòng đăng nhập lại.',
+      });
+      // Tùy chọn: gọi hàm logout tại đây
+    }
+
+    // Các lỗi 400 (Validation) hoặc 500 (Server)
+    if (data) {
+      return data; // Trả về cho component tự xử lý (như trang Login, Register)
+    }
+
     return Promise.reject(error);
   }
 );

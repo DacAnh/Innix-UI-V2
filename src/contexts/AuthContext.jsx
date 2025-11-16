@@ -28,9 +28,10 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setIsAuthenticated(false);
-    setUser({ email: '', name: '' });
+    setUser({ email: '', name: '', role: { name: '', permissions: [] } });
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('innix_user'); // Xóa user khi logout
     // Có thể điều hướng về trang login ở đây nếu muốn
   };
 
@@ -49,13 +50,33 @@ export const AuthProvider = ({ children }) => {
           if (userFromApi) {
             setUser(userFromApi);
             setIsAuthenticated(true);
+            // Cập nhật lại localStorage nếu có thay đổi
+            localStorage.setItem('innix_user', JSON.stringify(userFromApi));
           }
+        } else if (res && res.statusCode === 403) {
+          // 2. LÀ USER THƯỜNG (Bị 403 từ /account)
+          // API thất bại, nhưng token vẫn hợp lệ.
+          // Lấy data cũ từ localStorage đã lưu lúc login.
+          const localUser = localStorage.getItem('innix_user');
+          if (localUser) {
+            setUser(JSON.parse(localUser));
+            setIsAuthenticated(true);
+          } else {
+            // Có token nhưng ko có data user -> Lỗi -> Logout
+            logout();
+          }
+        } else {
+          // 3. Lỗi khác (401, 500...) -> Token hỏng
+          logout();
         }
       } catch (error) {
         // Nếu token hết hạn hoặc lỗi thì logout luôn
         console.log('Lỗi xác thực user:', error);
         // logout(); // Có thể bật dòng này nếu muốn chặt chẽ
       }
+    } else {
+      // 5. Không có token
+      setIsAuthenticated(false);
     }
     setAppLoading(false);
   };

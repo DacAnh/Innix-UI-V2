@@ -1,122 +1,116 @@
 import axios from './axios-customize';
 
-// Login
+// === AUTH ===
 export const callLogin = (email, password) => {
-  return axios.post('/api/v2/auth/login', {
-    email,
-    password,
-  });
+  return axios.post('/api/v2/auth/login', { email, password });
 };
-
-// Thêm hàm này để lấy thông tin user khi F5 trang
+export const callRegister = (userData) => {
+  return axios.post('/api/v2/auth/register', userData);
+};
 export const callFetchAccount = () => {
   return axios.get('/api/v2/auth/account');
 };
-
 export const callLogout = () => {
   return axios.post('/api/v2/auth/logout');
 };
 
-// API Đăng ký tài khoản
-export const callRegister = (userData) => {
-  // userData là object chứa: { name, email, password, age, gender, address, phone }
-  return axios.post('/api/v2/auth/register', userData);
-};
+// === USER ===
+export const callCreateUser = (user) => axios.post('/api/v2/users', user);
+export const callUpdateUser = (user) => axios.put('/api/v2/users', user);
+export const callDeleteUser = (id) => axios.delete(`/api/v2/users/${id}`);
+export const callFetchUser = (query) => axios.get(`/api/v2/users?${query}`);
 
-// 1. Tạo mới User (POST /api/v2/users)
-export const callCreateUser = (user) => {
-  return axios.post('/api/v2/users', user);
-};
+// === PERMISSION ===
+export const callCreatePermission = (data) =>
+  axios.post('/api/v2/permissions', data);
+export const callUpdatePermission = (data) =>
+  axios.put('/api/v2/permissions', data);
+export const callDeletePermission = (id) =>
+  axios.delete(`/api/v2/permissions/${id}`);
+export const callFetchPermission = (query) =>
+  axios.get(`/api/v2/permissions?${query}`);
 
-// 2. Cập nhật User (PUT /api/v2/users - ID nằm trong body)
-export const callUpdateUser = (user) => {
-  return axios.put('/api/v2/users', user);
-};
+// === ROLE ===
+export const callCreateRole = (data) => axios.post('/api/v2/roles', data);
+export const callUpdateRole = (data) => axios.put('/api/v2/roles', data);
+export const callDeleteRole = (id) => axios.delete(`/api/v2/roles/${id}`);
+export const callFetchRole = (query) => axios.get(`/api/v2/roles?${query}`);
+export const callFetchRoleById = (id) => axios.get(`/api/v2/roles/${id}`);
 
-// 3. Xóa User (DELETE /api/v2/users/{id})
-export const callDeleteUser = (id) => {
-  return axios.delete(`/api/v2/users/${id}`);
-};
-
-// URL: /api/v2/permissions
-export const callCreatePermission = (data) => {
-  return axios.post('/api/v2/permissions', data);
-};
-
-export const callUpdatePermission = (data) => {
-  return axios.put('/api/v2/permissions', data);
-};
-
-export const callDeletePermission = (id) => {
-  return axios.delete(`/api/v2/permissions/${id}`);
-};
-
-export const callFetchPermission = (query) => {
-  // query ví dụ: page=1&size=10
-  return axios.get(`/api/v2/permissions?${query}`);
-};
-
-// ==========================
-// ROLE API
-// ==========================
-// URL: /api/v2/roles
-export const callCreateRole = (data) => {
-  return axios.post('/api/v2/roles', data);
-};
-
-export const callUpdateRole = (data) => {
-  return axios.put('/api/v2/roles', data);
-};
-
-export const callDeleteRole = (id) => {
-  return axios.delete(`/api/v2/roles/${id}`);
-};
-
-export const callFetchRole = (query) => {
-  return axios.get(`/api/v2/roles?${query}`);
-};
-
-export const callFetchRoleById = (id) => {
-  return axios.get(`/api/v2/roles/${id}`);
-};
-
-// === ACCOMMODATION TYPE API ===
-// URL: /api/v2/accommodation-types
-export const callCreateAccommodationType = (data) => {
-  return axios.post('/api/v2/accommodation-types', data);
-};
-
-export const callUpdateAccommodationType = (data, id) => {
-  return axios.put(`/api/v2/accommodation-types/${id}`, data);
-};
-
-export const callDeleteAccommodationType = (id) => {
-  return axios.delete(`/api/v2/accommodation-types/${id}`);
-};
-
-export const callFetchAccommodationType = (query) => {
-  return axios.get(`/api/v2/accommodation-types?${query}`);
-};
-
-export const callFetchAccommodationTypeById = (id) => {
-  return axios.get(`/api/v2/accommodation-types/${id}`);
-};
-
-// === FILE UPLOAD API ===
-// Upload file đơn lẻ
+// === FILE UPLOAD ===
 export const callUploadFile = (file, folder = 'others') => {
   const bodyFormData = new FormData();
   bodyFormData.append('file', file);
   bodyFormData.append('folder', folder);
-
   return axios({
     method: 'post',
     url: '/api/v2/files',
     data: bodyFormData,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
 
-// ... các API khác
+// === ACCOMMODATION TYPE ===
+export const callCreateAccommodationType = (data) =>
+  axios.post('/api/v2/accommodation-types', data);
+export const callUpdateAccommodationType = (data, id) =>
+  axios.put(`/api/v2/accommodation-types/${id}`, data);
+export const callDeleteAccommodationType = (id) =>
+  axios.delete(`/api/v2/accommodation-types/${id}`);
+export const callFetchAccommodationType = (query) =>
+  axios.get(`/api/v2/accommodation-types?${query}`);
+export const callFetchAccommodationTypeById = (id) =>
+  axios.get(`/api/v2/accommodation-types/${id}`);
+
+// === ACCOMMODATION (Public/Admin) ===
+export const callFetchAllAccommodation = (query) => {
+  return axios.get(`/api/v2/accommodations?${query}`);
+};
+export const callFetchAccommodationById = (id) => {
+  return axios.get(`/api/v2/accommodations/${id}`);
+};
+
+// === PARTNER ACCOMMODATION (Partner + Admin actions) ===
+export const callFetchMyAccommodation = (query) => {
+  return axios.get(`/api/v2/partner/accommodations/me?${query}`);
+};
+export const callCreateAccommodation = (data) => {
+  return axios.post('/api/v2/partner/accommodations', data);
+};
+export const callUpdateAccommodation = (id, data) => {
+  return axios.put(`/api/v2/partner/accommodations/${id}`, data);
+};
+export const callDeleteAccommodation = (id) => {
+  return axios.delete(`/api/v2/partner/accommodations/${id}`);
+};
+
+// === PARTNER ROOM TYPE ===
+export const callCreateRoomType = (accId, data) => {
+  return axios.post(`/api/v2/partner/accommodations/${accId}/room-types`, data);
+};
+export const callUpdateRoomType = (accId, roomTypeId, data) => {
+  return axios.put(
+    `/api/v2/partner/accommodations/${accId}/room-types/${roomTypeId}`,
+    data
+  );
+};
+export const callDeleteRoomType = (accId, roomTypeId) => {
+  return axios.delete(
+    `/api/v2/partner/accommodations/${accId}/room-types/${roomTypeId}`
+  );
+};
+export const callFetchRoomTypesByAccommodation = (accId, query) => {
+  return axios.get(
+    `/api/v2/partner/accommodations/${accId}/room-types?${query}`
+  );
+};
+
+// === AMENITY API (Chờ Backend thêm) ===
+export const callFetchAmenities = (query) =>
+  axios.get(`/api/v2/amenities?${query}`);
+
+// === BOOKING API ===
+export const callFetchBookings = (query) =>
+  axios.get(`/api/v2/bookings?${query}`);
+export const callUpdateBookingStatus = (id, data) =>
+  axios.put(`/api/v2/bookings/status/${id}`, data);

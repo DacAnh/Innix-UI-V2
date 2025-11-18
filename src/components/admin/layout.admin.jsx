@@ -11,6 +11,8 @@ import {
   ExceptionOutlined,
   ApiOutlined,
   SafetyCertificateOutlined,
+  HomeOutlined, // Thêm
+  ShoppingCartOutlined, // Thêm
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar } from 'antd';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
@@ -64,6 +66,28 @@ const LayoutAdmin = () => {
       label: <Link to="/admin/role">Quản lý vai trò</Link>,
       key: '/admin/role',
       icon: <SafetyCertificateOutlined />,
+    },
+    {
+      label: 'Quản lý Chỗ ở',
+      key: 'accommodation-group',
+      icon: <HomeOutlined />,
+      children: [
+        {
+          label: <Link to="/admin/accommodation">Chỗ ở</Link>,
+          key: 'accommodation',
+          icon: <HomeOutlined />,
+        },
+        {
+          label: <Link to="/admin/accommodation-type">Loại hình</Link>,
+          key: 'accommodation-type',
+          icon: <HomeOutlined />,
+        },
+      ],
+    },
+    {
+      label: <Link to="/admin/booking">Quản lý Đơn hàng</Link>,
+      key: 'booking',
+      icon: <ShoppingCartOutlined />,
     },
   ];
 

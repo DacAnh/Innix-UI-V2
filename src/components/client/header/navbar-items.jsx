@@ -32,6 +32,7 @@ const NavbarItems = ({ onHamburgerMenuToggle }) => {
     'DASHBOARD',
     'ACCOMMODATIONS',
     'ACCOMMODATION_TYPES',
+    'PARTNER_PORTAL',
   ];
   const hasAdminAccess = permissions.some(
     (p) => p.module && adminModules.includes(p.module.trim())

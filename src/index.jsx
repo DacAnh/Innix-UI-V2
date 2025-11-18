@@ -22,6 +22,9 @@ import RolePage from './pages/admin/role';
 import PermissionPage from './pages/admin/permission';
 import AccommodationTypePage from './pages/admin/accommodation-type';
 import ProtectedRoute from './components/share/protected-route.ts/index';
+import AccommodationPage from './pages/admin/accommodation';
+import RoomTypePage from './pages/admin/accommodation/room-types'; // Mới
+import BookingPage from './pages/admin/booking'; // Mới
 
 // if (process.env.NODE_ENV === 'development') {
 // makeServer();
@@ -102,10 +105,10 @@ const router = createBrowserRouter([
         path: 'permission',
         element: <PermissionPage />,
       },
-      {
-        path: 'accommodation-type',
-        element: <AccommodationTypePage />,
-      },
+      { path: 'accommodation-type', element: <AccommodationTypePage /> },
+      { path: 'accommodation', element: <AccommodationPage /> },
+      { path: 'accommodation/:id/room-types', element: <RoomTypePage /> },
+      { path: 'booking', element: <BookingPage /> },
     ],
   },
 ]);

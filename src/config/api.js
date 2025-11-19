@@ -57,57 +57,83 @@ export const callUpdateAccommodationType = (data, id) =>
   axios.put(`/api/v2/accommodation-types/${id}`, data);
 export const callDeleteAccommodationType = (id) =>
   axios.delete(`/api/v2/accommodation-types/${id}`);
-export const callFetchAccommodationType = (query) =>
-  axios.get(`/api/v2/accommodation-types?${query}`);
+// export const callFetchAccommodationType = (query) =>
+//   axios.get(`/api/v2/accommodation-types?${query}`);
 export const callFetchAccommodationTypeById = (id) =>
   axios.get(`/api/v2/accommodation-types/${id}`);
 
-// === ACCOMMODATION (Public/Admin) ===
-export const callFetchAllAccommodation = (query) => {
-  return axios.get(`/api/v2/accommodations?${query}`);
-};
-export const callFetchAccommodationById = (id) => {
-  return axios.get(`/api/v2/accommodations/${id}`);
-};
+// === ACCOMMODATION TYPE ===
+export const callFetchAccommodationType = (query) =>
+  axios.get(`/api/v2/accommodation-types?${query}`);
 
-// === PARTNER ACCOMMODATION (Partner + Admin actions) ===
-export const callFetchMyAccommodation = (query) => {
-  return axios.get(`/api/v2/partner/accommodations/me?${query}`);
-};
-export const callCreateAccommodation = (data) => {
-  return axios.post('/api/v2/partner/accommodations', data);
-};
-export const callUpdateAccommodation = (id, data) => {
-  return axios.put(`/api/v2/partner/accommodations/${id}`, data);
-};
-export const callDeleteAccommodation = (id) => {
-  return axios.delete(`/api/v2/partner/accommodations/${id}`);
-};
+// === AMENITY (TIỆN ÍCH) ===
+export const callFetchAmenities = (query) =>
+  axios.get(`/api/v2/amenities?${query}`);
 
-// === PARTNER ROOM TYPE ===
+// === ACCOMMODATION (PUBLIC/ADMIN READ) ===
+export const callFetchAllAccommodation = (query) =>
+  axios.get(`/api/v2/accommodations?${query}`);
+export const callFetchAccommodationById = (id) =>
+  axios.get(`/api/v2/accommodations/${id}`);
+
+// === PARTNER ACCOMMODATION (WRITE) ===
+export const callFetchMyAccommodation = (query) =>
+  axios.get(`/api/v2/partner/accommodations/me?${query}`);
+export const callCreateAccommodation = (data) =>
+  axios.post('/api/v2/partner/accommodations', data);
+export const callUpdateAccommodation = (id, data) =>
+  axios.put(`/api/v2/partner/accommodations/${id}`, data);
+export const callDeleteAccommodation = (id) =>
+  axios.delete(`/api/v2/partner/accommodations/${id}`);
+
+// === PARTNER ROOM TYPE (Mới) ===
+// URL: /api/v2/partner/accommodations/{accId}/room-types
 export const callCreateRoomType = (accId, data) => {
   return axios.post(`/api/v2/partner/accommodations/${accId}/room-types`, data);
 };
+
 export const callUpdateRoomType = (accId, roomTypeId, data) => {
   return axios.put(
     `/api/v2/partner/accommodations/${accId}/room-types/${roomTypeId}`,
     data
   );
 };
+
 export const callDeleteRoomType = (accId, roomTypeId) => {
   return axios.delete(
     `/api/v2/partner/accommodations/${accId}/room-types/${roomTypeId}`
   );
 };
+
 export const callFetchRoomTypesByAccommodation = (accId, query) => {
   return axios.get(
     `/api/v2/partner/accommodations/${accId}/room-types?${query}`
   );
 };
 
+// API Upload ảnh cho RoomType
+export const callUploadRoomTypeImage = (accId, roomTypeId, file) => {
+  const bodyFormData = new FormData();
+  bodyFormData.append('file', file);
+  return axios({
+    method: 'post',
+    url: `/api/v2/partner/accommodations/${accId}/room-types/${roomTypeId}/images`,
+    data: bodyFormData,
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+// API Update Availability (Giá/Tồn kho) - Sơ sơ
+export const callUpdateRoomAvailability = (accId, roomTypeId, data) => {
+  return axios.put(
+    `/api/v2/partner/accommodations/${accId}/room-types/${roomTypeId}/availability`,
+    data
+  );
+};
+
 // === AMENITY API (Chờ Backend thêm) ===
-export const callFetchAmenities = (query) =>
-  axios.get(`/api/v2/amenities?${query}`);
+// export const callFetchAmenities = (query) =>
+//   axios.get(`/api/v2/amenities?${query}`);
 
 // === BOOKING API ===
 export const callFetchBookings = (query) =>

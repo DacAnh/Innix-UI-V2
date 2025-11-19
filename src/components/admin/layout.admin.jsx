@@ -68,24 +68,12 @@ const LayoutAdmin = () => {
       icon: <SafetyCertificateOutlined />,
     },
     {
-      label: 'Quản lý Chỗ ở',
-      key: 'accommodation-group',
+      label: <Link to="/admin/accommodation">Quản lý chỗ ở</Link>,
+      key: 'accommodation',
       icon: <HomeOutlined />,
-      children: [
-        {
-          label: <Link to="/admin/accommodation">Chỗ ở</Link>,
-          key: 'accommodation',
-          icon: <HomeOutlined />,
-        },
-        {
-          label: <Link to="/admin/accommodation-type">Loại hình</Link>,
-          key: 'accommodation-type',
-          icon: <HomeOutlined />,
-        },
-      ],
     },
     {
-      label: <Link to="/admin/booking">Quản lý Đơn hàng</Link>,
+      label: <Link to="/admin/booking">Quản lý đơn hàng</Link>,
       key: 'booking',
       icon: <ShoppingCartOutlined />,
     },

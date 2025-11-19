@@ -108,21 +108,31 @@ const AccommodationPage = () => {
       title: 'SĐT',
       dataIndex: 'contactPhone',
     },
-    // Cột Quản lý Phòng (Nếu bạn đã làm trang RoomType)
-    /*
-        { 
-            title: 'Quản lý Phòng',
-            render: (_, record) => (
-                <Button 
-                    type="dashed" 
-                    icon={<AppstoreOutlined />}
-                    onClick={() => navigate(`/admin/accommodation/${record.id}/room-types`)}
-                >
-                    Phòng
-                </Button>
-            )
-        },
-        */
+    // Cột Quản lý Phòng
+    {
+      title: 'Quản lý Phòng',
+      key: 'roomTypes',
+      render: (_, record) => (
+        <Access
+          permission={{
+            method: 'GET',
+            apiPath: '/api/v2/partner/accommodations/{id}/room-types',
+            module: 'ROOM_TYPES',
+          }}
+          hideChildren
+        >
+          <Button
+            type="dashed"
+            icon={<AppstoreOutlined />}
+            onClick={() =>
+              navigate(`/admin/accommodation/${record.id}/room-types`)
+            }
+          >
+            Loại phòng
+          </Button>
+        </Access>
+      ),
+    },
     {
       title: 'Hành động',
       render: (_, record) => (

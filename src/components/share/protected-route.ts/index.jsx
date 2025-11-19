@@ -19,6 +19,7 @@ const ProtectedRoute = (props) => {
     'ROOMS',
     'ACCOMMODATION_TYPES',
     'PARTNER_PORTAL',
+    'ROOM_TYPES',
   ];
   const hasAdminAccess = permissions.some(
     (p) => p.module && adminModules.includes(p.module.trim())

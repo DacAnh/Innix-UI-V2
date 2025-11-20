@@ -59,8 +59,6 @@ export const callDeleteAccommodationType = (id) =>
   axios.delete(`/api/v2/accommodation-types/${id}`);
 // export const callFetchAccommodationType = (query) =>
 //   axios.get(`/api/v2/accommodation-types?${query}`);
-export const callFetchAccommodationTypeById = (id) =>
-  axios.get(`/api/v2/accommodation-types/${id}`);
 
 // === ACCOMMODATION TYPE ===
 export const callFetchAccommodationType = (query) =>
@@ -134,6 +132,30 @@ export const callUpdateRoomAvailability = (accId, roomTypeId, data) => {
 // === AMENITY API (Chờ Backend thêm) ===
 // export const callFetchAmenities = (query) =>
 //   axios.get(`/api/v2/amenities?${query}`);
+
+// === PUBLIC ACCOMMODATION API (Dành cho Khách/Trang chủ) ===
+// URL: /api/v2/accommodations?page=1&size=10...
+export const callFetchPublicAccommodations = (query) => {
+  return axios.get(`/api/v2/accommodations?${query}`);
+};
+
+// API lấy chi tiết (khi khách click vào xem)
+export const callFetchPublicAccommodationById = (id) => {
+  return axios.get(`/api/v2/accommodations/${id}`);
+};
+
+// === API PUBLIC LẤY DANH SÁCH PHÒNG CỦA 1 CHỖ Ở ===
+// URL: /api/v2/accommodations/{id}/room-types
+export const callFetchPublicRoomTypes = (accommodationId, query) => {
+  return axios.get(
+    `/api/v2/accommodations/${accommodationId}/room-types?${query}`
+  );
+};
+
+// Lấy thông tin 1 loại hình (để hiển thị tên lên tiêu đề)
+export const callFetchAccommodationTypeById = (id) => {
+  return axios.get(`/api/v2/accommodation-types/${id}`);
+};
 
 // === BOOKING API ===
 export const callFetchBookings = (query) =>

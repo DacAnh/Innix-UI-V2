@@ -1,77 +1,80 @@
-import { faStar, faCheck } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, useNavigate } from 'react-router-dom';
-import { formatPrice } from '../../../config/utils/price-helpers';
+import { EnvironmentOutlined, StarFilled } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { Tag } from 'antd';
 
-const HotelViewCard = (props) => {
-  const {
-    id: hotelCode,
-    image,
-    title,
-    subtitle,
-    benefits,
-    price,
-    ratings,
-  } = props;
+const HotelCard = ({ item }) => {
   const navigate = useNavigate();
-  const onBookNowClick = () => {
-    navigate(`/hotel/${hotelCode}`);
-  };
+
+  // Xử lý ảnh: Nếu không có ảnh thì dùng ảnh placeholder
+  const imageUrl =
+    item.thumbnailImageUrl || 'https://placehold.co/600x400?text=No+Image';
 
   return (
     <div
-      className="card border p-4 flex flex-col md:flex-row gap-x-2 w-full"
-      data-testid="hotel-view-card"
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer overflow-hidden border border-gray-100 flex flex-col h-full"
+      onClick={() => navigate(`/hotel/${item.id}`)}
     >
-      <div className="cursor-pointer">
-        <Link
-          to={`/hotel/${hotelCode}`}
-          className="block text-slate-700 hover:text-brand transition-colors duration-300"
-        >
-          <img
-            src={image.imageUrl}
-            alt={image.accessibleText}
-            className="md:w-[220px] md:h-[140px]"
-          />
-        </Link>
-      </div>
-      <div className="flex flex-col justify-between ml-0 md:ml-2 flex-1">
-        <div>
-          <Link
-            to={`/hotel/${hotelCode}`}
-            className="block text-slate-700 hover:text-brand transition-colors duration-300"
+      {/* 1. Phần Hình ảnh (Chiếm 50-60% chiều cao card) */}
+      <div className="relative h-48 overflow-hidden group">
+        <img
+          src={imageUrl}
+          alt={item.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        />
+        {/* Label Loại hình (VD: Khách sạn, Resort) ở góc ảnh */}
+        <div className="absolute top-3 left-3">
+          <Tag
+            color="blue"
+            className="m-0 font-semibold shadow-sm border-none px-2 py-1"
           >
-            <h4 className="text-2xl font-bold text-slate-600">{title}</h4>
-          </Link>
-          <p className="text-slate-600 text-sm">{subtitle}</p>
+            {item.type?.displayName || 'Chỗ ở'}
+          </Tag>
         </div>
-        <ul>
-          {benefits.length > 0 &&
-            benefits.map((benefit, index) => (
-              <li className="text-green-800 font-medium text-sm" key={index}>
-                <FontAwesomeIcon icon={faCheck} /> {benefit}
-              </li>
-            ))}
-        </ul>
       </div>
-      <div className="flex flex-col ml-0 md:ml-auto justify-between border-l-0 md:border-l-2 items-stretch pl-0 md:pl-4">
-        <div className="flex justify-between my-3 md:my-0 items-center md:flex-col md:justify-between w-full h-full">
-          <h4 className="font-medium text-sm text-white bg-brand p-2">
-            {ratings} <FontAwesomeIcon icon={faStar} />
-          </h4>
-          <p className="text-slate-600 font-bold whitespace-nowrap">
-            {formatPrice(price)} VNĐ
-          </p>
+
+      {/* 2. Phần Thông tin chi tiết */}
+      <div className="p-4 flex flex-col flex-grow justify-between">
+        <div>
+          {/* Tên và Đánh giá */}
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="text-lg font-bold text-gray-800 line-clamp-2 hover:text-brand transition-colors">
+              {item.name}
+            </h3>
+            {/* Nếu có rating thì hiện, không thì ẩn */}
+            {item.ratingStar > 0 && (
+              <div className="flex items-center bg-brand/10 px-1.5 py-0.5 rounded text-xs font-bold text-brand">
+                <span>{item.ratingStar}</span>
+                <StarFilled className="text-[10px] ml-1" />
+              </div>
+            )}
+          </div>
+
+          {/* Địa chỉ */}
+          <div className="flex items-start text-gray-500 text-sm mb-3">
+            <EnvironmentOutlined className="mt-1 mr-1.5 flex-shrink-0" />
+            <span className="line-clamp-2">
+              {item.addressLine}, {item.ward}, {item.district}, {item.province}
+            </span>
+          </div>
         </div>
-        <button
-          className=" bg-brand-secondary px-4 py-2 text-white whitespace-nowrap"
-          onClick={onBookNowClick}
-        >
-          Đặt Ngay
-        </button>
+
+        {/* Giá & Nút (Phần chân card) */}
+        <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-end">
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">Giá mỗi đêm từ</p>
+            {/* Backend chưa trả về minPrice nên tạm thời để "Liên hệ" */}
+            <p className="text-lg font-extrabold text-gray-900">
+              Liên hệ
+              {/* Hoặc hiển thị số nếu có: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(1500000)} */}
+            </p>
+          </div>
+          <button className="bg-brand text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Xem ngay
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default HotelViewCard;
+export default HotelCard;

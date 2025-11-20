@@ -25,6 +25,7 @@ import ProtectedRoute from './components/share/protected-route.ts/index';
 import AccommodationPage from './pages/admin/accommodation';
 import RoomTypePage from './pages/admin/accommodation/room-types'; // Mới
 import BookingPage from './pages/admin/booking'; // Mới
+import HotelsPage from './pages/hotel/index';
 
 // if (process.env.NODE_ENV === 'development') {
 // makeServer();
@@ -41,9 +42,13 @@ const router = createBrowserRouter([
         path: '/',
         element: <Home />,
       },
+      // {
+      //   path: '/hotels',
+      //   element: <HotelsSearch />,
+      // },
       {
         path: '/hotels',
-        element: <HotelsSearch />,
+        element: <HotelsPage />,
       },
       {
         path: '/about-us',

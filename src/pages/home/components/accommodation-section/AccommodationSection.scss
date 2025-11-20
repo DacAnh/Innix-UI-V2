@@ -1,0 +1,12 @@
+.accommodation-section {
+
+    .slick-prev:before,
+    .slick-next:before {
+        display: none; // Ẩn mũi tên mặc định xấu xí của slick
+    }
+
+    .slick-disabled {
+        opacity: 0; // Ẩn mũi tên khi hết đường cuộn
+        cursor: default;
+    }
+}

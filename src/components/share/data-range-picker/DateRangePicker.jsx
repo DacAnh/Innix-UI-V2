@@ -24,12 +24,14 @@ const DateRangePicker = (props) => {
   useOutsideClickHandler(wrapperRef, () => setisDatePickerVisible(false));
 
   // Format dates for display
-  const formattedStartDate = dateRange[0].startDate
-    ? formatDate(dateRange[0].startDate)
-    : 'Check-in';
-  const formattedEndDate = dateRange[0].endDate
-    ? formatDate(dateRange[0].endDate)
-    : 'Check-out';
+  // Kiểm tra xem mảng có tồn tại và có phần tử không
+  const selection = props.selectionRange || [
+    {
+      startDate: new Date(),
+      endDate: new Date(),
+      key: 'selection',
+    },
+  ];
 
   return (
     <div className="relative flex" data-testid="date-range-picker">
@@ -40,7 +42,7 @@ const DateRangePicker = (props) => {
             : 'stay-booker__input--secondary'
         } stay-booker__input px-8 py-2 w-[50%]`}
         type="text"
-        value={formattedStartDate}
+        // value={formattedStartDate}
         onFocus={onDatePickerIconClick}
         readOnly
       ></input>
@@ -57,7 +59,7 @@ const DateRangePicker = (props) => {
             : '  stay-booker__input--secondary'
         } stay-booker__input px-8 py-2 w-[50%]`}
         type="text"
-        value={formattedEndDate}
+        // value={formattedEndDate}
         onFocus={onDatePickerIconClick}
         readOnly
       ></input>
@@ -67,7 +69,7 @@ const DateRangePicker = (props) => {
             editableDateInputs={true}
             onChange={onDateChangeHandler}
             moveRangeOnFirstSelection={false}
-            ranges={dateRange}
+            ranges={selection}
             minDate={new Date()}
             direction="horizontal"
             className={`sb__date-range-picker`}

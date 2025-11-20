@@ -1,169 +1,53 @@
 import HeroCover from './components/hero-cover/HeroCover';
-import PopularLocations from './components/popular-locations/popular-locations';
-import axios from 'config/axios-customize';
-import { useState, useEffect, useCallback } from 'react';
-import { MAX_GUESTS_INPUT_VALUE } from 'config/constants';
-import ResultsContainer from '../../components/client/hotel/results';
-import { formatDate } from 'config/utils/date-helpers';
-import { useNavigate } from 'react-router-dom';
-import _debounce from 'lodash/debounce';
+import { useState, useEffect } from 'react';
+import { callFetchAccommodationType } from '../../config/api';
+import AccommodationSection from './components/accommodation-section/AccommodationSection'; // Import Component mới
+import { Spin } from 'antd';
 
-/**
- * Home component that renders the main page of the application.
- * It includes a navigation bar, hero cover, popular locations, results container, and footer.
- */
 const Home = () => {
-  const navigate = useNavigate();
+  const [types, setTypes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // State variables
-  const [isDatePickerVisible, setisDatePickerVisible] = useState(false);
-  const [locationInputValue, setLocationInputValue] = useState('pune');
-  const [numGuestsInputValue, setNumGuestsInputValue] = useState('');
-  const [popularDestinationsData, setPopularDestinationsData] = useState({
-    isLoading: true,
-    data: [],
-    errors: [],
-  });
-  const [hotelsResults, setHotelsResults] = useState({
-    isLoading: true,
-    data: [],
-    errors: [],
-  });
-
-  // State for storing available cities
-  const [availableCities, setAvailableCities] = useState([]);
-
-  const [filteredTypeheadResults, setFilteredTypeheadResults] = useState([]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debounceFn = useCallback(_debounce(queryResults, 1000), []);
-
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: null,
-      endDate: null,
-      key: 'selection',
-    },
-  ]);
-
-  const onDatePickerIconClick = () => {
-    setisDatePickerVisible(!isDatePickerVisible);
-  };
-
-  const onLocationChangeInput = async (newValue) => {
-    setLocationInputValue(newValue);
-    // Debounce the queryResults function to avoid making too many requests
-    debounceFn(newValue, availableCities);
-  };
-
-  /**
-   * Queries the available cities based on the user's input.
-   * @param {string} query - The user's input.
-   * @returns {void}
-   *
-   */
-  function queryResults(query, availableCities) {
-    const filteredResults = availableCities.filter((city) =>
-      city.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredTypeheadResults(filteredResults);
-  }
-
-  const onNumGuestsInputChange = (numGuests) => {
-    if (
-      (numGuests < MAX_GUESTS_INPUT_VALUE && numGuests > 0) ||
-      numGuests === ''
-    ) {
-      setNumGuestsInputValue(numGuests);
-    }
-  };
-
-  const onDateChangeHandler = (ranges) => {
-    setDateRange([ranges.selection]);
-  };
-
-  /**
-   * Handles the click event of the search button.
-   * It gathers the number of guests, check-in and check-out dates, and selected city
-   * from the component's state, and then navigates to the '/hotels' route with this data.
-   */
-  const onSearchButtonAction = () => {
-    const numGuest = Number(numGuestsInputValue);
-    const checkInDate = formatDate(dateRange[0].startDate) ?? '';
-    const checkOutDate = formatDate(dateRange[0].endDate) ?? '';
-    const city = locationInputValue;
-    navigate('/hotels', {
-      state: {
-        numGuest,
-        checkInDate,
-        checkOutDate,
-        city,
-      },
-    });
-  };
-
-  // useEffect(() => {
-  //   /**
-  //    * Fetches initial data for the Home route.
-  //    * @returns {Promise<void>} A promise that resolves when the data is fetched.
-  //    */
-  //   const getInitialData = async () => {
-  //     const popularDestinationsResponse = await axios.get(
-  //       '/api/popularDestinations'
-  //     );
-  //     const hotelsResultsResponse = await axios.get('/api/nearbyHotels');
-
-  //     const availableCitiesResponse = await axios.get('/api/availableCities');
-  //     if (availableCitiesResponse) {
-  //       setAvailableCities(availableCitiesResponse.data.elements);
-  //     }
-
-  //     if (popularDestinationsResponse) {
-  //       setPopularDestinationsData({
-  //         isLoading: false,
-  //         data: popularDestinationsResponse.data.elements,
-  //         errors: popularDestinationsResponse.errors,
-  //       });
-  //     }
-  //     if (hotelsResultsResponse) {
-  //       setHotelsResults({
-  //         isLoading: false,
-  //         data: hotelsResultsResponse.data.elements,
-  //         errors: hotelsResultsResponse.errors,
-  //       });
-  //     }
-  //   };
-  //   getInitialData();
-  // }, []);
+  // 1. Lấy danh sách Loại hình (Hotel, Resort, Homestay...)
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const res = await callFetchAccommodationType('page=1&size=10'); // Lấy 10 loại hình đầu tiên
+        if (res && res.statusCode === 200) {
+          setTypes(res.data.result);
+        }
+      } catch (error) {
+        console.log('Lỗi tải loại hình:', error);
+      }
+      setIsLoading(false);
+    };
+    fetchTypes();
+  }, []);
 
   return (
-    <>
-      <HeroCover
-        locationInputValue={locationInputValue}
-        numGuestsInputValue={numGuestsInputValue}
-        locationTypeheadResults={filteredTypeheadResults}
-        isDatePickerVisible={isDatePickerVisible}
-        setisDatePickerVisible={setisDatePickerVisible}
-        onLocationChangeInput={onLocationChangeInput}
-        onNumGuestsInputChange={onNumGuestsInputChange}
-        dateRange={dateRange}
-        onDateChangeHandler={onDateChangeHandler}
-        onDatePickerIconClick={onDatePickerIconClick}
-        onSearchButtonAction={onSearchButtonAction}
-      />
-      <div className="container mx-auto">
-        <PopularLocations popularDestinationsData={popularDestinationsData} />
-        <div className="my-8">
-          <h2 className="text-3xl font-medium text-slate-700 text-center my-2">
-            Khách sạn nổi bật
-          </h2>
-          <ResultsContainer
-            hotelsResults={hotelsResults}
-            enableFilters={false}
-          />
+    <div className="home-page pb-12 bg-gray-50">
+      <HeroCover />
+
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Spin size="large" />
         </div>
-      </div>
-    </>
+      ) : (
+        <div className="mt-8">
+          {/* 2. Duyệt qua từng loại hình và render Section tương ứng */}
+          {types.length > 0 &&
+            types.map((type) => (
+              <AccommodationSection key={type.id} type={type} />
+            ))}
+
+          {types.length === 0 && (
+            <div className="text-center py-10 text-gray-500">
+              Chưa có dữ liệu.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 

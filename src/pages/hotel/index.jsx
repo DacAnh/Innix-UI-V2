@@ -1,392 +1,142 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import GlobalSearchBox from 'components/client/search.client';
-import ResultsContainer from 'components/client/hotel/results';
-import axios from 'config/axios-customize';
-import isEmpty from '../../config/utils/helpers';
-import { MAX_GUESTS_INPUT_VALUE } from 'config/constants';
-import { formatDate } from 'config/utils/date-helpers';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { parse } from 'date-fns';
-import PaginationController from 'components/share/pagination-controller/PaginationController';
-import { SORTING_FILTER_LABELS } from 'config/constants';
-import _debounce from 'lodash/debounce';
+import { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom'; // Hook để lấy param URL
+import {
+  callFetchPublicAccommodations,
+  callFetchAccommodationTypeById,
+} from '../../config/api';
+import HotelCard from '../../components/client/card/hotel.card';
+import { Spin, Breadcrumb, Empty, Pagination } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
 
-/**
- * Represents the hotels search component.
- * @component
- * @returns {JSX.Element} The hotels search component.
- */
-const HotelsSearch = () => {
-  // State for managing date picker visibility
-  const [isDatePickerVisible, setisDatePickerVisible] = useState(false);
+const HotelsPage = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  // State for managing location input value
-  const [locationInputValue, setLocationInputValue] = useState('pune');
+  // Lấy typeId từ URL (?type=1)
+  const typeId = searchParams.get('type');
 
-  // State for managing number of guests input value
-  const [numGuestsInputValue, setNumGuestsInputValue] = useState('');
+  const [hotels, setHotels] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentType, setCurrentType] = useState(null); // Lưu thông tin loại hình đang chọn
 
-  // State for storing available cities
-  const [availableCities, setAvailableCities] = useState([]);
+  // State phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const pageSize = 12;
 
-  // State for managing current results page
-  const [currentResultsPage, setCurrentResultsPage] = useState(1);
-
-  // State for managing filters data
-  const [filtersData, setFiltersData] = useState({
-    isLoading: true,
-    data: [],
-    errors: [],
-  });
-
-  // State for storing hotels search results
-  const [hotelsResults, setHotelsResults] = useState({
-    isLoading: true,
-    data: [],
-    errors: [],
-  });
-
-  const [dateRange, setDateRange] = useState([
-    {
-      startDate: null,
-      endDate: null,
-      key: 'selection',
-    },
-  ]);
-
-  // State for managing sorting filter value
-  const [sortByFilterValue, setSortByFilterValue] = useState({
-    value: 'default',
-    label: 'Sort by',
-  });
-
-  // State for managing selected filters
-  const [selectedFiltersState, setSelectedFiltersState] = useState({});
-
-  const [filteredTypeheadResults, setFilteredTypeheadResults] = useState([]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debounceFn = useCallback(_debounce(queryResults, 1000), []);
-
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const location = useLocation();
-
-  // Options for sorting filter
-  const sortingFilterOptions = [
-    { value: 'default', label: 'Sort by' },
-    { value: 'priceLowToHigh', label: SORTING_FILTER_LABELS.PRICE_LOW_TO_HIGH },
-    { value: 'priceHighToLow', label: SORTING_FILTER_LABELS.PRICE_HIGH_TO_LOW },
-  ];
-
-  /**
-   * Handles updates to sorting filter.
-   * @param {Object} selectedOption - The selected option.
-   */
-  const onSortingFilterChange = (selectedOption) => {
-    setSortByFilterValue(selectedOption);
-  };
-
-  /**
-   * Handles updates to filters.
-   * @param {Object} updatedFilter - The filter object that is updated.
-   */
-  const onFiltersUpdate = (updatedFilter) => {
-    setSelectedFiltersState(
-      selectedFiltersState.map((filterGroup) => {
-        if (filterGroup.filterId === updatedFilter.filterId) {
-          return {
-            ...filterGroup,
-            filters: filterGroup.filters.map((filter) => {
-              if (filter.id === updatedFilter.id) {
-                return {
-                  ...filter,
-                  isSelected: !filter.isSelected,
-                };
-              }
-              return filter;
-            }),
-          };
+  // 1. Fetch thông tin Loại hình (để lấy tên hiển thị lên tiêu đề)
+  useEffect(() => {
+    const fetchTypeInfo = async () => {
+      if (typeId) {
+        try {
+          const res = await callFetchAccommodationTypeById(typeId);
+          if (res && res.statusCode === 200) {
+            setCurrentType(res.data);
+          }
+        } catch (error) {
+          console.log('Lỗi lấy thông tin loại hình:', error);
         }
-        return filterGroup;
-      })
-    );
-  };
-
-  const onDateChangeHandler = (ranges) => {
-    setDateRange([ranges.selection]);
-  };
-
-  const onSearchButtonAction = () => {
-    const activeFilters = getActiveFilters();
-    const numGuest = Number(numGuestsInputValue);
-    const checkInDate = formatDate(dateRange.startDate) ?? '';
-    const checkOutDate = formatDate(dateRange.endDate) ?? '';
-    setSearchParams({
-      city: locationInputValue,
-      numGuests: numGuestsInputValue,
-    });
-    fetchHotels({
-      city: locationInputValue,
-      ...activeFilters,
-      guests: numGuest,
-      checkInDate,
-      checkOutDate,
-    });
-  };
-
-  const getActiveFilters = () => {
-    const filters = {};
-    selectedFiltersState.forEach((category) => {
-      const selectedValues = category.filters
-        .filter((filter) => filter.isSelected)
-        .map((filter) => filter.value);
-
-      if (selectedValues.length > 0) {
-        filters[category.filterId] = selectedValues;
-      }
-    });
-    if (!isEmpty(filters)) {
-      return filters;
-    }
-    return null;
-  };
-
-  // Toggles the visibility of the date picker
-  const onDatePickerIconClick = () => {
-    setisDatePickerVisible(!isDatePickerVisible);
-  };
-
-  /**
-   * Handles changes in the location input.
-   * Refreshes hotel data if the location is valid.
-   * @param {string} value - The new location value.
-   */
-  const onLocationChangeInput = async (newValue) => {
-    setLocationInputValue(newValue);
-    // Debounce the queryResults function to avoid making too many requests
-    debounceFn(newValue, availableCities);
-  };
-
-  /**
-   * Queries the available cities based on the user's input.
-   * @param {string} query - The user's input.
-   * @returns {void}
-   *
-   */
-  function queryResults(query, availableCities) {
-    const filteredResults = availableCities
-      .filter((city) => city.toLowerCase().includes(query.toLowerCase()))
-      .slice(0, 5);
-    setFilteredTypeheadResults(filteredResults);
-  }
-
-  /**
-   * Handles changes in the number of guests input.
-   * @param {String} numGuests - Number of guests.
-   */
-  const onNumGuestsInputChange = (numGuests) => {
-    if (numGuests < MAX_GUESTS_INPUT_VALUE && numGuests > 0) {
-      setNumGuestsInputValue(numGuests);
-    }
-  };
-
-  const onClearFiltersAction = () => {
-    const hasActiveFilters = selectedFiltersState.some((filterGroup) =>
-      filterGroup.filters.some((filter) => filter.isSelected)
-    );
-
-    if (hasActiveFilters) {
-      setSelectedFiltersState(
-        selectedFiltersState.map((filterGroup) => ({
-          ...filterGroup,
-          filters: filterGroup.filters.map((filter) => ({
-            ...filter,
-            isSelected: false,
-          })),
-        }))
-      );
-    }
-  };
-
-  /**
-   * Fetches hotels based on the provided filters.
-   * @param {Object} filters - The filters to apply.
-   * @returns {Promise<void>}
-   * @async
-   */
-  const fetchHotels = async (filters) => {
-    setHotelsResults({
-      isLoading: true,
-      data: [],
-      errors: [],
-    });
-    const hotelsResultsResponse = await axios.get('/api/hotels', {
-      filters: JSON.stringify(filters),
-      currentPage: currentResultsPage,
-      advancedFilters: JSON.stringify([
-        {
-          sortBy: sortByFilterValue.value,
-        },
-      ]),
-    });
-    if (hotelsResultsResponse) {
-      setHotelsResults({
-        isLoading: false,
-        data: hotelsResultsResponse.data.elements,
-        errors: hotelsResultsResponse.errors,
-        metadata: hotelsResultsResponse.metadata,
-        pagination: hotelsResultsResponse.paging,
-      });
-    }
-  };
-
-  const getVerticalFiltersData = async () => {
-    const filtersDataResponse = await axios.get('api/hotels/verticalFilters');
-    if (filtersDataResponse) {
-      setFiltersData({
-        isLoading: false,
-        data: filtersDataResponse.data.elements,
-        errors: filtersDataResponse.errors,
-      });
-    }
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentResultsPage(page);
-  };
-
-  const handlePreviousPageChange = () => {
-    setCurrentResultsPage((prev) => {
-      if (prev <= 1) return prev;
-      return prev - 1;
-    });
-  };
-
-  const handleNextPageChange = () => {
-    setCurrentResultsPage((prev) => {
-      if (prev >= hotelsResults.pagination.totalPages) return prev;
-      return prev + 1;
-    });
-  };
-
-  // Fetches the list of available cities
-  const fetchAvailableCities = async () => {
-    const availableCitiesResponse = await axios.get('/api/availableCities');
-    if (availableCitiesResponse) {
-      setAvailableCities(availableCitiesResponse.data.elements);
-    }
-  };
-
-  // Fetch available cities and initial data on component mount
-  useEffect(() => {
-    fetchAvailableCities();
-    getVerticalFiltersData();
-  }, []);
-
-  // And update location input value if city is present in the URL
-  // Also update number of guests input value if numGuests is present in the URL
-  useEffect(() => {
-    if (searchParams.get('city')) {
-      setLocationInputValue(searchParams.get('city'));
-    }
-
-    if (searchParams.get('numGuests')) {
-      setNumGuestsInputValue(searchParams.get('numGuests'));
-    }
-  }, [searchParams]);
-
-  // Update selected filters state when filters data changes
-  useEffect(() => {
-    setSelectedFiltersState(
-      filtersData.data.map((filterGroup) => ({
-        ...filterGroup,
-        filters: filterGroup.filters.map((filter) => ({
-          ...filter,
-          isSelected: false,
-        })),
-      }))
-    );
-  }, [filtersData]);
-
-  useEffect(() => {
-    if (selectedFiltersState.length > 0) {
-      const activeFilters = getActiveFilters();
-      if (activeFilters) {
-        activeFilters.city = locationInputValue.toLowerCase();
-        fetchHotels(activeFilters);
       } else {
-        fetchHotels({
-          city: locationInputValue,
-        });
+        setCurrentType(null); // Nếu không có typeId thì là xem tất cả
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFiltersState, currentResultsPage, sortByFilterValue]);
+    };
+    fetchTypeInfo();
+  }, [typeId]);
 
-  // Fetch hotels when location input value changes
+  // 2. Fetch danh sách Chỗ ở (Lọc theo Type nếu có)
   useEffect(() => {
-    if (location.state) {
-      const { city, numGuest, checkInDate, checkOutDate } = location.state;
-      if (numGuest) {
-        setNumGuestsInputValue(numGuest.toString());
+    const fetchHotels = async () => {
+      setIsLoading(true);
+      try {
+        // Xây dựng query string
+        let query = `page=${currentPage}&size=${pageSize}`;
+
+        // Nếu có typeId trên URL thì thêm vào query để Backend lọc
+        if (typeId) {
+          query += `&typeId=${typeId}`;
+        }
+
+        const res = await callFetchPublicAccommodations(query);
+        if (res && res.statusCode === 200) {
+          setHotels(res.data.result);
+          setTotal(res.data.meta.total);
+        }
+      } catch (error) {
+        console.log('Lỗi tải danh sách:', error);
       }
-      setLocationInputValue(city);
-      if (checkInDate && checkOutDate) {
-        setDateRange([
-          {
-            startDate: parse(checkInDate, 'dd/MM/yyyy', new Date()),
-            endDate: parse(checkOutDate, 'dd/MM/yyyy', new Date()),
-            key: 'selection',
-          },
-        ]);
-      }
-    }
-  }, [location]);
+      setIsLoading(false);
+    };
+
+    fetchHotels();
+  }, [typeId, currentPage]); // Chạy lại khi typeId hoặc trang thay đổi
+
+  // Xử lý đổi trang
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo(0, 0); // Cuộn lên đầu
+  };
 
   return (
-    <div className="hotels">
-      <div className="bg-brand px-2 lg:h-[120px] h-[220px] flex items-center justify-center">
-        <GlobalSearchBox
-          locationInputValue={locationInputValue}
-          locationTypeheadResults={filteredTypeheadResults}
-          numGuestsInputValue={numGuestsInputValue}
-          isDatePickerVisible={isDatePickerVisible}
-          setisDatePickerVisible={setisDatePickerVisible}
-          onLocationChangeInput={onLocationChangeInput}
-          onNumGuestsInputChange={onNumGuestsInputChange}
-          dateRange={dateRange}
-          onDateChangeHandler={onDateChangeHandler}
-          onDatePickerIconClick={onDatePickerIconClick}
-          onSearchButtonAction={onSearchButtonAction}
-        />
-      </div>
-      <div className="my-4"></div>
-      <div className="w-[180px]"></div>
-      <ResultsContainer
-        hotelsResults={hotelsResults}
-        enableFilters={true}
-        filtersData={filtersData}
-        onFiltersUpdate={onFiltersUpdate}
-        onClearFiltersAction={onClearFiltersAction}
-        selectedFiltersState={selectedFiltersState}
-        sortByFilterValue={sortByFilterValue}
-        onSortingFilterChange={onSortingFilterChange}
-        sortingFilterOptions={sortingFilterOptions}
-      />
-      {hotelsResults.pagination?.totalPages > 1 && (
-        <div className="my-4">
-          <PaginationController
-            currentPage={currentResultsPage}
-            totalPages={hotelsResults.pagination?.totalPages}
-            handlePageChange={handlePageChange}
-            handlePreviousPageChange={handlePreviousPageChange}
-            handleNextPageChange={handleNextPageChange}
+    <div className="bg-gray-50 min-h-screen pb-10">
+      {/* Breadcrumb & Header */}
+      <div className="bg-white shadow-sm mb-6">
+        <div className="container mx-auto px-4 py-4">
+          <Breadcrumb
+            items={[
+              { href: '/', title: <HomeOutlined /> },
+              { title: 'Danh sách chỗ ở' },
+            ]}
           />
+
+          <h1 className="text-3xl font-bold text-gray-800 mt-4">
+            {currentType ? currentType.displayName : 'Tất cả chỗ ở'}
+          </h1>
+          {currentType && (
+            <p className="text-gray-500 mt-1">
+              {currentType.description ||
+                `Khám phá các ${currentType.displayName} tốt nhất`}
+            </p>
+          )}
         </div>
-      )}
+      </div>
+
+      {/* Danh sách Card */}
+      <div className="container mx-auto px-4">
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Spin size="large" />
+          </div>
+        ) : (
+          <>
+            {hotels.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {hotels.map((item) => (
+                  <HotelCard key={item.id} item={item} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 bg-white rounded-lg text-center shadow-sm">
+                <Empty description="Không tìm thấy chỗ ở nào phù hợp" />
+              </div>
+            )}
+
+            {/* Phân trang */}
+            {total > 0 && (
+              <div className="flex justify-center mt-10">
+                <Pagination
+                  current={currentPage}
+                  total={total}
+                  pageSize={pageSize}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
-export default HotelsSearch;
+export default HotelsPage;

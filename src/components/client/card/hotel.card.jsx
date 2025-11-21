@@ -6,8 +6,9 @@ const HotelCard = ({ item }) => {
   const navigate = useNavigate();
 
   // Xử lý ảnh: Nếu không có ảnh thì dùng ảnh placeholder
-  const imageUrl =
-    item.thumbnailImageUrl || 'https://placehold.co/600x400?text=No+Image';
+  const imageUrl = item.thumbnailImageUrl
+    ? `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${item.thumbnailImageUrl}`
+    : 'https://placehold.co/600x400?text=No+Image';
 
   return (
     <div

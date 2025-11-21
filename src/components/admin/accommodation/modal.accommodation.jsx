@@ -87,12 +87,18 @@ const ModalAccommodation = (props) => {
 
         // Xử lý ảnh bìa
         if (dataInit.thumbnailImageUrl) {
+          // Kiểm tra xem DB lưu full URL hay tên file
+          const isFullUrl = dataInit.thumbnailImageUrl.startsWith('http');
+          const url = isFullUrl
+            ? dataInit.thumbnailImageUrl
+            : `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${dataInit.thumbnailImageUrl}`;
+
           setDataImage([
             {
               uid: '-1',
-              name: 'thumbnail.png',
+              name: dataInit.thumbnailImageUrl, // Lưu tên file gốc
               status: 'done',
-              url: dataInit.thumbnailImageUrl,
+              url: url,
             },
           ]);
         } else {
@@ -132,12 +138,24 @@ const ModalAccommodation = (props) => {
   const handleUploadFileImage = async ({ file, onSuccess, onError }) => {
     setLoadingUpload(true);
     try {
-      const res = await callUploadFile(file, 'accommodations'); // Folder trên server
+      const res = await callUploadFile(file, 'accommodations');
       if (res && res.statusCode === 200) {
         const fileName = res.data.fileName;
-        // Ghép URL (Backend cần trả về fileName, Frontend tự ghép)
         const url = `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${fileName}`;
-        onSuccess({ url: url, fileName: fileName }, file);
+
+        // Tạo object file chuẩn
+        const newFile = {
+          uid: file.uid,
+          name: fileName,
+          status: 'done',
+          url: url,
+          response: { fileName, url },
+        };
+
+        // ✅ CẬP NHẬT STATE TRỰC TIẾP TẠI ĐÂY
+        setDataImage([newFile]);
+
+        onSuccess('ok');
       } else {
         onError('Lỗi upload');
       }
@@ -167,24 +185,21 @@ const ModalAccommodation = (props) => {
       reader.onerror = (error) => reject(error);
     });
 
-  const handleChange = ({ fileList: newFileList }) => {
-    // Map URL từ response vào file object để Antd hiển thị đúng
-    const newFiles = newFileList.map((file) => {
-      if (file.response) {
-        file.url = file.response.url;
-        file.status = 'done';
-      }
-      return file;
-    });
-    setDataImage(newFiles);
+  const handleChange = ({ fileList }) => {
+    // Nếu fileList rỗng (người dùng xóa ảnh), cập nhật state rỗng
+    if (fileList.length === 0) {
+      setDataImage([]);
+    }
   };
 
   // === SUBMIT ===
+
   const onFinish = async (values) => {
     const {
       name,
       country,
       province,
+      district,
       ward,
       addressLine,
       contactPhone,
@@ -195,27 +210,52 @@ const ModalAccommodation = (props) => {
       longitude,
     } = values;
 
-    // Lấy URL ảnh bìa
+    // === 1. LOGIC LẤY URL ẢNH (SỬA LẠI CHO CHẮC CHẮN) ===
     let thumbnailImageUrl = '';
     if (dataImage.length > 0) {
-      thumbnailImageUrl = dataImage[0].url || dataImage[0].response?.url;
+      // Nếu là ảnh mới upload -> lấy từ name (do handleUpload đã gán fileName vào name)
+      // Nếu là ảnh cũ -> lấy từ name (do useEffect đã gán)
+      thumbnailImageUrl = dataImage[0].name;
+
+      // Trường hợp đặc biệt: Nếu name là full URL (do logic cũ nào đó), ta phải cắt lấy tên file
+      // Nhưng với logic chuẩn ở trên, name luôn là fileName (vd: "abc.jpg")
     }
 
+    console.log('DEBUG Submit:', { dataImage, thumbnailImageUrl });
+
+    if (!thumbnailImageUrl) {
+      notification.error({
+        message: 'Lỗi',
+        description: 'Vui lòng upload ảnh bìa!',
+      });
+      return;
+    }
+
+    // === 3. TẠO PAYLOAD ===
     const payload = {
       name,
-      description,
+      description: description, // Lấy từ state ReactQuill
+      totalRoom: values.totalRoom,
       country,
       province,
+      district,
       ward,
       addressLine,
       contactPhone,
       contactEmail,
-      thumbnailImageUrl, // ✅ Trường mới
-      latitude: latitude || null,
-      longitude: longitude || null,
+      isPriority: values.isPriority || false,
+      priorityLevel: values.priorityLevel || 0,
+      autoApproveBookings: values.autoApproveBookings || false,
+
       accommodationTypeId,
       amenityIds: amenityIds || [],
+
+      thumbnailImageUrl: thumbnailImageUrl, // ✅ Đảm bảo biến này có giá trị
+      latitude: latitude || null,
+      longitude: longitude || null,
     };
+
+    console.log('Payload gửi đi:', payload); // Xem cái này trong F12 Console
 
     setIsSubmit(true);
 

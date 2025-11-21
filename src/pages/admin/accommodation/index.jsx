@@ -90,7 +90,12 @@ const AccommodationPage = () => {
     {
       title: 'Ảnh',
       dataIndex: 'thumbnailImageUrl',
-      render: (url) => (url ? <Image src={url} width={50} /> : 'N/A'),
+      render: (fileName) => {
+        if (!fileName) return 'N/A';
+        // Ghép URL
+        const imageUrl = `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${fileName}`;
+        return <Image src={imageUrl} width={50} />;
+      },
     },
     {
       title: 'Loại hình',

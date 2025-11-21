@@ -13,14 +13,23 @@ import 'react-quill/dist/quill.snow.css';
 import Slider from 'react-slick';
 
 const HotelDetailsViewCard = ({ hotel, rooms }) => {
-  // ✅ Nhận thêm prop 'rooms'
+  // Nhận thêm prop 'rooms'
   if (!hotel) return null;
 
+  // Xử lý ảnh chính
+  const thumbnail = hotel.thumbnailImageUrl
+    ? `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${hotel.thumbnailImageUrl}`
+    : null;
+
+  // Xử lý list ảnh (nếu backend trả về list tên file)
   const images =
     hotel.imageUrls && hotel.imageUrls.length > 0
-      ? hotel.imageUrls
-      : hotel.thumbnailImageUrl
-        ? [hotel.thumbnailImageUrl]
+      ? hotel.imageUrls.map(
+          (name) =>
+            `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${name}`
+        )
+      : thumbnail
+        ? [thumbnail]
         : ['https://placehold.co/800x400?text=No+Image'];
 
   function RoomNextArrow(props) {

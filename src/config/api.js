@@ -121,14 +121,6 @@ export const callUploadRoomTypeImage = (accId, roomTypeId, file) => {
   });
 };
 
-// API Update Availability (Giá/Tồn kho) - Sơ sơ
-export const callUpdateRoomAvailability = (accId, roomTypeId, data) => {
-  return axios.put(
-    `/api/v2/partner/accommodations/${accId}/room-types/${roomTypeId}/availability`,
-    data
-  );
-};
-
 // === AMENITY API (Chờ Backend thêm) ===
 // export const callFetchAmenities = (query) =>
 //   axios.get(`/api/v2/amenities?${query}`);
@@ -162,3 +154,16 @@ export const callFetchBookings = (query) =>
   axios.get(`/api/v2/bookings?${query}`);
 export const callUpdateBookingStatus = (id, data) =>
   axios.put(`/api/v2/bookings/status/${id}`, data);
+
+// === ROOM AVAILABILITY ===
+// Lấy lịch giá của 1 loại phòng trong khoảng thời gian
+export const callFetchRoomAvailability = (roomTypeId, startDate, endDate) => {
+  return axios.get(
+    `/api/v2/partner/room-availability?roomTypeId=${roomTypeId}&startDate=${startDate}&endDate=${endDate}`
+  );
+};
+
+// Cập nhật giá/tồn kho (DTO: RoomAvailabilityRequest)
+export const callUpdateRoomAvailability = (data) => {
+  return axios.post(`/api/v2/partner/room-availability`, data);
+};

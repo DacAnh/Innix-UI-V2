@@ -29,6 +29,7 @@ import {
 import { useParams, Link } from 'react-router-dom';
 import ModalRoomType from '../../../components/admin/accommodation/modal.room-type'; // Modal tạo/sửa thông tin cơ bản
 import moment from 'moment';
+import PriceCalendar from './components/PriceCalendar';
 
 const RoomTypePage = () => {
   const { id: accommodationId } = useParams();
@@ -112,83 +113,6 @@ const RoomTypePage = () => {
     },
   ];
 
-  // --- COMPONENT CON: QUẢN LÝ GIÁ (SƠ SƠ) ---
-  const PriceManagement = () => {
-    const [form] = Form.useForm();
-
-    const onFinishPrice = async (values) => {
-      if (!selectedRoomType) {
-        message.error('Vui lòng chọn loại phòng trên bảng bên trái!');
-        return;
-      }
-      const payload = {
-        startDate: values.dateRange[0].format('YYYY-MM-DD'),
-        endDate: values.dateRange[1].format('YYYY-MM-DD'),
-        price: values.price,
-        quantity: values.quantity,
-      };
-
-      const res = await callUpdateRoomAvailability(
-        accommodationId,
-        selectedRoomType.id,
-        payload
-      );
-      if (res && res.statusCode === 200) {
-        message.success('Cập nhật giá thành công!');
-      } else {
-        notification.error({ message: 'Lỗi', description: res.message });
-      }
-    };
-
-    return (
-      <Card
-        title={
-          selectedRoomType
-            ? `Thiết lập giá cho: ${selectedRoomType.name}`
-            : 'Vui lòng chọn loại phòng'
-        }
-      >
-        <Form form={form} layout="vertical" onFinish={onFinishPrice}>
-          <Form.Item
-            label="Khoảng ngày áp dụng"
-            name="dateRange"
-            rules={[{ required: true }]}
-          >
-            <DatePicker.RangePicker style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item
-            label="Giá theo đêm (VND)"
-            name="price"
-            rules={[{ required: true }]}
-          >
-            <InputNumber
-              style={{ width: '100%' }}
-              formatter={(value) =>
-                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-              }
-              parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Số lượng phòng trống"
-            name="quantity"
-            rules={[{ required: true }]}
-          >
-            <InputNumber style={{ width: '100%' }} />
-          </Form.Item>
-          <Button
-            type="primary"
-            icon={<DollarOutlined />}
-            htmlType="submit"
-            disabled={!selectedRoomType}
-          >
-            Cập nhật giá
-          </Button>
-        </Form>
-      </Card>
-    );
-  };
-
   return (
     <div style={{ padding: 20 }}>
       <Breadcrumb style={{ marginBottom: 16 }}>
@@ -247,13 +171,15 @@ const RoomTypePage = () => {
             label: 'Quản lý Giá & Tồn kho',
             children: (
               <div style={{ display: 'flex', gap: 20 }}>
-                <div style={{ flex: 1 }}>
-                  <h3>Danh sách phòng (Click để chọn)</h3>
+                {/* Cột trái: Danh sách phòng để chọn */}
+                <div style={{ flex: 1, maxWidth: '300px' }}>
+                  <h3>Chọn loại phòng:</h3>
                   <Table
-                    columns={[{ title: 'Tên', dataIndex: 'name' }]}
+                    columns={[{ title: 'Tên phòng', dataIndex: 'name' }]}
                     dataSource={listData}
                     rowKey="id"
                     pagination={false}
+                    size="small"
                     onRow={(record) => ({
                       onClick: () => setSelectedRoomType(record),
                       style: {
@@ -264,8 +190,43 @@ const RoomTypePage = () => {
                     })}
                   />
                 </div>
-                <div style={{ flex: 2 }}>
-                  <PriceManagement />
+
+                {/* Cột phải: Lịch Giá (PriceCalendar) */}
+                <div style={{ flex: 3 }}>
+                  {selectedRoomType ? (
+                    <div
+                      style={{
+                        background: '#fff',
+                        padding: 10,
+                        borderRadius: 8,
+                        border: '1px solid #f0f0f0',
+                      }}
+                    >
+                      <h3 style={{ marginBottom: 10 }}>
+                        Lịch giá của:{' '}
+                        <span style={{ color: '#1890ff' }}>
+                          {selectedRoomType.name}
+                        </span>
+                      </h3>
+                      {/* ✅ Truyền ID loại phòng vào PriceCalendar */}
+                      <PriceCalendar roomTypeId={selectedRoomType.id} />
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        height: 400,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        background: '#f5f5f5',
+                        borderRadius: 8,
+                      }}
+                    >
+                      <span style={{ color: '#999' }}>
+                        Vui lòng chọn một loại phòng bên trái để xem lịch giá
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ),

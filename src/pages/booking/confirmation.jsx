@@ -1,95 +1,37 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar } from '@fortawesome/free-solid-svg-icons';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { useReactToPrint } from 'react-to-print';
-import { useRef } from 'react';
+import { Result, Button } from 'antd';
 
-/**
- * Represents the booking confirmation component.
- * @component
- * @returns {JSX.Element} The booking confirmation component.
- */
 const BookingConfirmation = () => {
-  const contentToPrint = useRef(null);
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [bookingDetails, setBookingDetails] = useState(null);
+  // Lấy tham số từ URL (do VNPAY/Backend trả về)
+  // Ví dụ: ?vnp_ResponseCode=00...
+  // HOẶC nếu Backend redirect về /booking-success thì có thể không có params, chỉ cần hiện thông báo.
 
-  /**
-   * Handles the print event.
-   * @function
-   * @returns {void}
-   */
-  const handlePrint = useReactToPrint({
-    documentTitle: 'Xác Nhận Đặt Phòng',
-    removeAfterPrint: true,
-  });
-
-  // Set booking details from location state passed from the previous page(checkout page)
-  useEffect(() => {
-    if (location.state) {
-      const { bookingDetails } = location.state.confirmationData;
-      setBookingDetails(bookingDetails);
-    } else {
-      navigate('/');
-    }
-  }, [bookingDetails, location.state, navigate]);
+  // Tuy nhiên, cách chuẩn là Backend xử lý IPN, rồi redirect user về trang "Cảm ơn".
+  // Tại đây ta chỉ cần hiện UI.
 
   return (
-    <div className="md:mx-auto max-w-[800px] my-40">
-      <div className="flex justify-between mx-2 rounded-md my-2">
-        <Link
-          to="/"
-          className={`border p-2 min-w-[120px] text-center transition-all delay-100 hover:bg-brand hover:text-white`}
-        >
-          Về Trang Chủ
-        </Link>
-        <button
-          onClick={() => {
-            handlePrint(null, () => contentToPrint.current);
-          }}
-          className="border p-2 min-w-[120px] transition-all delay-75 hover:bg-gray-500 hover:text-white hover:animate-bounce"
-        >
-          In Trang
-        </button>
-      </div>
-      <div
-        ref={contentToPrint}
-        className="flex mx-2  px-4 py-12 items-center justify-center flex-col border rounded-md"
-      >
-        <div className="flex items-center justify-center mb-2">
-          <FontAwesomeIcon icon={faStar} className="text-brand text-xl" />
-          <FontAwesomeIcon icon={faStar} className="text-brand text-3xl" />
-          <FontAwesomeIcon icon={faStar} className="text-brand text-4xl" />
-          <FontAwesomeIcon icon={faStar} className="text-brand text-3xl" />
-          <FontAwesomeIcon icon={faStar} className="text-brand text-xl" />
-        </div>
-        <h1 className="text-gray-700 text-2xl font-bold">
-          Đặt Phòng Thành Công
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Cảm ơn bạn đã đặt phòng! Yêu cầu của bạn đã được xác nhận.
-        </p>
-        <p className="text-gray-600">
-          Vui lòng kiểm tra email để xem chi tiết đặt phòng và hướng dẫn cho kỳ
-          nghỉ của bạn.
-        </p>
-        <div className="mt-4 flex justify-center flex-wrap items-center">
-          {bookingDetails &&
-            bookingDetails.map((detail, index) => (
-              <div key={index} className="border-r-2 px-4">
-                <p className="text-gray-600 text-sm">{detail.label}</p>
-                <span className="text-gray-600 text-sm font-bold">
-                  {detail.value}
-                </span>
-              </div>
-            ))}
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg">
+        <Result
+          status="success"
+          title="Đặt phòng thành công!"
+          subTitle="Cảm ơn bạn đã sử dụng dịch vụ. Mã đặt phòng và thông tin chi tiết đã được gửi đến email của bạn."
+          extra={[
+            <Button type="primary" key="home" onClick={() => navigate('/')}>
+              Về trang chủ
+            </Button>,
+            <Button key="history" onClick={() => navigate('/user-profile')}>
+              Xem lịch sử
+            </Button>,
+          ]}
+        />
       </div>
     </div>
   );
 };
+
 export default BookingConfirmation;

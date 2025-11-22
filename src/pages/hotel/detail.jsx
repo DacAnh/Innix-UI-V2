@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import {
   callFetchPublicAccommodationById,
   callFetchPublicRoomTypes,
-} from '../../config/api'; // ✅ Import thêm API Room
+  callCheckRoomAvailability,
+} from '../../config/api';
 import HotelDetailsViewCard from './components/hotel-details-view-card/HotelDetailsViewCard';
 import HotelBookingDetailsCard from './components/hotel-booking-details-card/HotelBookingDetailsCard';
 import HotelDetailsViewCardSkeleton from './components/hotel-details-view-card-skeleton/HotelDetailsViewCardSkeleton';
@@ -15,6 +16,56 @@ const HotelDetails = () => {
   const [hotel, setHotel] = useState(null);
   const [rooms, setRooms] = useState([]); // ✅ State lưu danh sách phòng
   const [isLoading, setIsLoading] = useState(true);
+
+  const [dateRange, setDateRange] = useState([null, null]);
+
+  // Hàm tính toán giá lại khi khách đổi ngày
+  const handleDateChange = async (dates) => {
+    setDateRange(dates);
+    if (!dates || !dates[0] || !dates[1]) return;
+
+    // Nếu đã chọn đủ ngày, gọi API tính giá cho TẤT CẢ loại phòng
+    // (Cách tối ưu: API lấy danh sách phòng nên hỗ trợ nhận param checkIn/checkOut để tính giá luôn)
+    // Nhưng ở đây ta sẽ làm thủ công ở Frontend loop qua từng phòng (hoặc gọi API mới)
+
+    const updatedRooms = await Promise.all(
+      rooms.map(async (room) => {
+        const payload = {
+          roomTypeId: room.id,
+          checkInDate: dates[0].format('YYYY-MM-DD'),
+          checkOutDate: dates[1].format('YYYY-MM-DD'),
+          amount: 1, // Mặc định check 1 phòng
+        };
+
+        try {
+          const res = await callCheckRoomAvailability(payload);
+          if (
+            res &&
+            res.statusCode === 200 &&
+            res.data &&
+            res.data.available === true
+          ) {
+            return {
+              ...room,
+              displayPrice: res.data.totalPrice,
+              isAvailable: true,
+            };
+          } else {
+            return {
+              ...room,
+              displayPrice: null,
+              isAvailable: false,
+              errorMsg: res?.data?.message || 'Hết phòng',
+            };
+          }
+        } catch (e) {
+          return { ...room, isAvailable: false };
+        }
+      })
+    );
+
+    setRooms(updatedRooms);
+  };
 
   useEffect(() => {
     const fetchHotelDetail = async () => {
@@ -75,12 +126,20 @@ const HotelDetails = () => {
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={16}>
             {/* ✅ Truyền thêm props 'rooms' xuống */}
-            <HotelDetailsViewCard hotel={hotel} rooms={rooms} />
+            <HotelDetailsViewCard
+              hotel={hotel}
+              rooms={rooms}
+              dateRange={dateRange}
+            />
           </Col>
 
           <Col xs={24} lg={8}>
             <div className="sticky top-24">
-              <HotelBookingDetailsCard hotel={hotel} />
+              <HotelBookingDetailsCard
+                hotel={hotel}
+                dateRange={dateRange}
+                onDateChange={handleDateChange}
+              />
             </div>
           </Col>
         </Row>

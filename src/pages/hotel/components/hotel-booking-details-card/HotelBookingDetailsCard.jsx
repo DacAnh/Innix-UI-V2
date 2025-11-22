@@ -1,7 +1,7 @@
 import { Card, DatePicker, Button, InputNumber, Divider } from 'antd';
 import { useState } from 'react';
 
-const HotelBookingDetailsCard = ({ hotel }) => {
+const HotelBookingDetailsCard = ({ hotel, dateRange, onDateChange }) => {
   // Giá hiển thị tạm thời (cần logic lấy giá từ RoomType rẻ nhất)
   const displayPrice = 0;
 
@@ -10,6 +10,7 @@ const HotelBookingDetailsCard = ({ hotel }) => {
       <div className="mb-4">
         <span className="text-gray-500">Giá chỉ từ</span>
         <div className="flex items-baseline">
+          <span className="text-gray-500">Giá tham khảo</span>
           <span className="text-3xl font-bold text-brand">
             {new Intl.NumberFormat('vi-VN', {
               style: 'currency',
@@ -25,7 +26,13 @@ const HotelBookingDetailsCard = ({ hotel }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Ngày nhận/trả phòng
           </label>
-          <DatePicker.RangePicker className="w-full py-2" format="DD/MM/YYYY" />
+          <DatePicker.RangePicker
+            className="w-full py-2"
+            format="DD/MM/YYYY"
+            value={dateRange}
+            onChange={onDateChange}
+            placeholder={['Nhận phòng', 'Trả phòng']}
+          />
         </div>
 
         <div>
@@ -46,8 +53,8 @@ const HotelBookingDetailsCard = ({ hotel }) => {
       </div>
 
       <Divider />
-      <div className="text-center text-gray-500 text-xs">
-        Không thanh toán ngay. Bạn sẽ chọn loại phòng ở bước tiếp theo.
+      <div className="text-xs text-gray-500 mt-2">
+        * Vui lòng chọn ngày để xem giá chính xác.
       </div>
     </Card>
   );

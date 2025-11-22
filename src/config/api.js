@@ -167,3 +167,27 @@ export const callFetchRoomAvailability = (roomTypeId, startDate, endDate) => {
 export const callUpdateRoomAvailability = (data) => {
   return axios.post(`/api/v2/partner/room-availability`, data);
 };
+
+// === BOOKING & PAYMENT ===
+export const callCreateBooking = (data) => {
+  return axios.post('/api/v2/bookings', data);
+};
+
+// API kiểm tra giá và tình trạng phòng
+export const callCheckRoomAvailability = (data) => {
+  return axios.post('/api/v2/bookings/check-availability', data);
+};
+
+// API Callback khi từ VNPAY quay về
+export const callPaymentCallback = (params) => {
+  // params là object chứa các tham số vnp_...
+  // Chuyển object thành query string
+  const queryString = new URLSearchParams(params).toString();
+  return axios.get(`/api/v2/payment/vnpay-payment?${queryString}`);
+};
+
+// === PAYMENT (VNPAY) ===
+// API trả về URL thanh toán
+export const callCreateVnPayUrl = (bookingId) => {
+  return axios.post(`/api/v2/payment/create-vnpay-url?bookingId=${bookingId}`);
+};

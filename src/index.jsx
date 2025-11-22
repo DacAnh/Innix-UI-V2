@@ -14,7 +14,7 @@ import AboutUs from './pages/about-us';
 import BaseLayout from './components/share/layout.app';
 import ForgotPassword from './pages/auth/forgot-password';
 import Checkout from 'pages/booking';
-import BookingConfirmation from 'pages/booking/confirmation';
+import BookingConfirmation from './pages/booking/confirmation';
 import LayoutAdmin from './components/admin/layout.admin';
 import Dashboard from './pages/admin/dashboard';
 import UserPage from './pages/admin/user';

@@ -1,276 +1,277 @@
 import React, { useEffect, useState } from 'react';
 import FinalBookingSummary from './components/final-booking-summary/FinalBookingSummary';
-import { useLocation } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { getReadableMonthFormat } from 'config/utils/date-helpers';
-import { useSearchParams } from 'react-router-dom';
-import { AuthContext } from 'contexts/AuthContext';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { getReadableMonthFormat } from '../../config/utils/date-helpers'; // Sửa lại đường dẫn import cho đúng
 import { useContext } from 'react';
-import axios from 'config/axios-customize';
-import Loader from 'components/share/loader/loader';
-import Toast from 'components/share/toast/Toast';
+import { AuthContext } from '../../contexts/AuthContext'; // Sửa lại đường dẫn import
+import Loader from '../../components/share/loader/loader'; // Sửa lại đường dẫn import
+import Toast from '../../components/share/toast/Toast'; // Sửa lại đường dẫn import
+import { callCreateBooking, callCreateVnPayUrl } from '../../config/api'; // Import API
 
-/**
- * Checkout component for processing payments and collecting user information.
- *
- * @returns {JSX.Element} The rendered Checkout component.
- */
 const Checkout = () => {
   const [errors, setErrors] = useState({});
-
   const location = useLocation();
-
   const navigate = useNavigate();
-
   const [searchParams] = useSearchParams();
-
   const [toastMessage, setToastMessage] = useState('');
-
-  const { isAuthenticated, userDetails } = useContext(AuthContext);
-
+  const { isAuthenticated, user } = useContext(AuthContext); // Lấy user từ context mới (user, không phải userDetails)
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [paymentConfirmationDetails, setPaymentConfirmationDetails] = useState({
-    isLoading: false,
-    data: {},
-  });
+  const dismissToast = () => setToastMessage('');
 
-  const dismissToast = () => {
-    setToastMessage('');
-  };
-
-  // Form state for collecting user payment and address information
+  // Form chỉ cần thông tin liên hệ cơ bản (Không cần thẻ)
   const [formData, setFormData] = useState({
-    email: userDetails?.email ? userDetails?.email : '',
-    nameOnCard: '',
-    cardNumber: '',
-    expiry: '',
-    cvc: '',
-    address: '',
-    city: '',
-    state: '',
-    postalCode: '',
+    email: user?.email || '',
+    fullName: user?.name || '', // Lấy từ user.name
+    phone: user?.phone || '', // Nếu user có phone
+    note: '',
+    guestCount: 1,
   });
 
-  // Format the check-in and check-out date and time
-  const checkInDateTime = `${getReadableMonthFormat(
-    searchParams.get('checkIn')
-  )}, ${location.state?.checkInTime}`;
-  const checkOutDateTime = `${getReadableMonthFormat(
-    searchParams.get('checkOut')
-  )}, ${location.state?.checkOutTime}`;
+  // Thông tin từ trang trước (HotelDetails) truyền qua
+  const { roomId, roomName, pricePerNight, checkInTime, checkOutTime, total } =
+    location.state || {};
+  // Lưu ý: 'total' ở đây nên là số nguyên (VD: 1500000) để gửi cho VNPAY
+
+  const checkInDate = searchParams.get('checkIn');
+  const checkOutDate = searchParams.get('checkOut');
+
+  const checkInDateTime = `${getReadableMonthFormat(checkInDate)}, ${checkInTime || '14:00'}`;
+  const checkOutDateTime = `${getReadableMonthFormat(checkOutDate)}, ${checkOutTime || '12:00'}`;
 
   useEffect(() => {
-    const locationState = location.state;
-    const checkIn = searchParams.get('checkIn');
-    const checkOut = searchParams.get('checkOut');
-    if (!locationState || !checkIn || !checkOut) {
-      const hotelCode = searchParams.get('hotelCode');
-      navigate(`/hotel/${hotelCode}`);
+    if (!location.state || !checkInDate || !checkOutDate) {
+      console.log('Thiếu dữ liệu checkout:', {
+        state: location.state,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+      });
+      // navigate('/'); // 👈 Tạm thời comment dòng này để xem log
     }
   }, [location, navigate, searchParams]);
 
-  /**
-   * Handle form input changes and validate the input.
-   * @param {React.ChangeEvent<HTMLInputElement>} e The input change event.
-   */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const isValid = validationSchema[name](value);
     setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: !isValid });
+    // Validate đơn giản khi gõ
+    if (value.trim() !== '') {
+      setErrors({ ...errors, [name]: false });
+    }
   };
 
-  /**
-   * Handle form submission and validate the form.
-   * @param {React.FormEvent<HTMLFormElement>} e The form submission event.
-   * @returns {void}
-   * @todo Implement form submission logic.
-   * @todo Implement form validation logic.
-   * @todo Implement form submission error handling.
-   * @todo Implement form submission success handling.
-   * @todo Implement form submission loading state.
-   * @todo Implement form submission error state.
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let isValid = true;
+
+    // Validate
     const newErrors = {};
+    if (!formData.email) newErrors.email = true;
+    if (!formData.fullName) newErrors.fullName = true;
+    if (!formData.phone) newErrors.phone = true;
 
-    Object.keys(formData).forEach((field) => {
-      const isFieldValid = validationSchema[field](formData[field]);
-      newErrors[field] = !isFieldValid;
-      isValid = isValid && isFieldValid;
-    });
-
-    setErrors(newErrors);
-
-    if (!isValid) {
-      return; // Stop form submission if there are errors
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
+    setIsLoading(true);
     setIsSubmitDisabled(true);
-    setPaymentConfirmationDetails({
-      isLoading: true,
-      data: {},
-    });
-    const response = await axios.post('/api/payments/confirmation', formData);
-    if (response && response.data && response.errors.length === 0) {
-      setPaymentConfirmationDetails({
-        isLoading: false,
-        data: response.data,
-      });
-      const hotelName = searchParams.get('hotelName').replaceAll('-', '_');
-      navigate(`/booking-confirmation?payment=sucess&hotel=${hotelName}`, {
-        state: {
-          confirmationData: response.data,
-        },
-      });
-    } else {
-      setToastMessage('Thanh toán không thành công. Vui lòng thử lại');
+
+    try {
+      // 1. TẠO BOOKING (PENDING)
+      // Cần khớp với BookingRequest.java của Backend
+
+      const bookedRoom = {
+        roomTypeId: roomId,
+        quantity: 1, // Mặc định 1 phòng (hoặc lấy từ input nếu có)
+      };
+
+      const bookingPayload = {
+        // checkInDate: checkInDate,  // "YYYY-MM-DD"
+        // checkOutDate: checkOutDate, // "YYYY-MM-DD"
+        checkInDate: `${checkInDate}T14:00:00`, // Thêm giờ check-in (14h)
+        checkOutDate: `${checkOutDate}T12:00:00`, // Thêm giờ check-out (12h)
+        totalPrice: total, // Số tiền (VD: 2000000)
+        guestCount: parseInt(formData.guestCount), // ✅ Thêm dòng này (ép kiểu int cho chắc)
+        guestContactName: formData.fullName, // Map fullName -> guestContactName
+        guestContactPhone: formData.phone, // Map phone -> guestContactPhone
+        specialRequests: formData.note, // Map note -> specialRequests
+        currency: 'VND', // ✅ Thêm currency (để tránh lỗi null)
+        rooms: [bookedRoom], // ID loại phòng
+        paymentMethod: 'VNPAY',
+      };
+
+      console.log('Booking Payload:', bookingPayload);
+
+      const resBooking = await callCreateBooking(bookingPayload);
+
+      if (resBooking && resBooking.statusCode === 201) {
+        const bookingId = resBooking.data.id; // Lấy ID booking vừa tạo
+
+        // 2. GỌI API LẤY LINK VNPAY
+        // Backend: POST /api/v2/payment/create-vnpay-url?bookingId=...
+        const resPayment = await callCreateVnPayUrl(bookingId);
+
+        if (resPayment && resPayment.statusCode === 200) {
+          // Backend trả về chuỗi URL trực tiếp hoặc object { url: "..." }
+          // Dựa vào code PaymentController: return ResponseEntity.ok(url); (String)
+          // Nhưng axios-customize thường wrap data.
+          // Hãy kiểm tra log hoặc giả định nó nằm trong res.data hoặc chính là res
+
+          const paymentUrl = resPayment.data?.paymentUrl;
+          // (Lưu ý: Nếu axios-customize trả về trực tiếp string thì là resPayment, nếu bọc data thì là resPayment.data)
+
+          if (paymentUrl) {
+            // 3. CHUYỂN HƯỚNG SANG VNPAY
+            window.location.href = paymentUrl;
+          } else {
+            setToastMessage('URL thanh toán không hợp lệ.');
+            setIsSubmitDisabled(false);
+          }
+        } else {
+          setToastMessage('Lỗi tạo cổng thanh toán.');
+          setIsSubmitDisabled(false);
+        }
+      } else {
+        setToastMessage(resBooking?.message || 'Lỗi tạo đơn đặt phòng.');
+        setIsSubmitDisabled(false);
+      }
+    } catch (error) {
+      console.log(error);
+      setToastMessage('Có lỗi xảy ra, vui lòng thử lại.');
       setIsSubmitDisabled(false);
-      setPaymentConfirmationDetails({
-        isLoading: false,
-        data: {},
-      });
+    } finally {
+      // Chỉ tắt loading nếu có lỗi, nếu thành công thì để loading chờ redirect
+      if (!isSubmitDisabled) setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 py-10">
       <FinalBookingSummary
-        hotelName={searchParams.get('hotelName').replaceAll('-', ' ')}
+        hotelName={searchParams.get('hotelName')?.replaceAll('-', ' ')}
         checkIn={checkInDateTime}
         checkOut={checkOutDateTime}
         isAuthenticated={isAuthenticated}
-        phone={userDetails?.phone}
-        email={userDetails?.email}
-        fullName={userDetails?.fullName}
+        // Truyền lại data vừa nhập để hiển thị bên summary nếu cần
+        phone={formData.phone}
+        email={formData.email}
+        fullName={formData.fullName}
       />
-      <div className="relative bg-white border shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-lg mx-auto">
-        {paymentConfirmationDetails.isLoading && (
+
+      <div className="relative bg-white border shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 w-full max-w-lg mx-auto mt-6">
+        {isLoading && (
           <Loader
             isFullScreen={true}
-            loaderText={'Đang xử lý thanh toán, vui lòng chờ...'}
+            loaderText={'Đang chuyển hướng sang VNPAY...'}
           />
         )}
-        <form
-          onSubmit={handleSubmit}
-          className={` ${
-            paymentConfirmationDetails.isLoading ? 'opacity-40' : ''
-          }`}
-        >
+
+        <h2 className="text-xl font-bold mb-6 text-gray-800 text-center">
+          Thông tin người đặt
+        </h2>
+
+        <form onSubmit={handleSubmit} className={isLoading ? 'opacity-40' : ''}>
           <InputField
-            label="Địa chỉ email"
+            label="Họ và tên"
+            type="text"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            placeholder="Nguyễn Văn A"
+            required={true}
+            error={errors.fullName}
+          />
+
+          <InputField
+            label="Email"
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder="email@example.com"
             required={true}
             error={errors.email}
           />
+
           <InputField
-            label="Tên trên thẻ"
-            type="text"
-            name="nameOnCard"
-            value={formData.nameOnCard}
+            label="Số điện thoại"
+            type="tel"
+            name="phone"
+            value={formData.phone}
             onChange={handleChange}
-            placeholder="Tên như trên thẻ"
+            placeholder="0912xxxxxx"
             required={true}
-            error={errors.nameOnCard}
+            error={errors.phone}
           />
-          <InputField
-            label="Số thẻ"
-            type="text"
-            name="cardNumber"
-            value={formData.cardNumber}
-            onChange={handleChange}
-            placeholder="0000 0000 0000 0000"
-            required={true}
-            error={errors.cardNumber}
-          />
-          <div className="flex mb-4 justify-between">
-            <InputField
-              label="Ngày hết hạn (MM/YY)"
-              type="text"
-              name="expiry"
-              value={formData.expiry}
+
+          {/* ✅ THÊM INPUT SỐ LƯỢNG KHÁCH */}
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="guestCount"
+            >
+              Số lượng khách <span className="text-red-500">*</span>
+            </label>
+            <input
+              className="shadow appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="guestCount"
+              type="number"
+              name="guestCount"
+              min="1"
+              value={formData.guestCount}
               onChange={handleChange}
-              placeholder="MM/YY"
-              required={true}
-              error={errors.expiry}
-            />
-            <InputField
-              label="CVC"
-              type="text"
-              name="cvc"
-              value={formData.cvc}
-              onChange={handleChange}
-              placeholder="CVC"
-              required={true}
-              error={errors.cvc}
+              placeholder="Nhập số lượng khách"
+              required
             />
           </div>
-          <InputField
-            label="Địa chỉ"
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            placeholder="Địa chỉ cụ thể"
-            required={true}
-            error={errors.address}
-          />
-          <InputField
-            label="Thành phố"
-            type="text"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            placeholder="Thành phố"
-            required={true}
-            error={errors.city}
-          />
-          <div className="flex mb-4 justify-between">
-            <InputField
-              label="Quốc gia"
-              type="text"
-              name="state"
-              value={formData.state}
+
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="note"
+            >
+              Ghi chú (Tùy chọn)
+            </label>
+            <textarea
+              className="shadow appearance-none border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="note"
+              name="note"
+              rows="3"
+              value={formData.note}
               onChange={handleChange}
-              placeholder="Quốc gia"
-              required={true}
-              error={errors.state}
-            />
-            <InputField
-              label="Mã zip code"
-              type="text"
-              name="postalCode"
-              value={formData.postalCode}
-              onChange={handleChange}
-              placeholder="Code"
-              required={true}
-              error={errors.postalCode}
+              placeholder="Yêu cầu đặc biệt..."
             />
           </div>
-          <div className="flex items-center justify-between">
+
+          <div className="flex items-center justify-center mt-6">
             <button
-              className={`bg-brand hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full transition duration-300 ${
-                isSubmitDisabled
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-blue-700'
+              className={`bg-brand hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full transition duration-300 shadow-lg flex justify-center items-center ${
+                isSubmitDisabled ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               type="submit"
               disabled={isSubmitDisabled}
             >
-              Thanh toán {location.state?.total}
+              <img
+                src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746013.png"
+                alt="VNPAY"
+                className="h-6 mr-2 bg-white rounded px-1"
+              />
+              Thanh toán{' '}
+              {new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+              }).format(total || 0)}
             </button>
           </div>
+
+          <p className="text-xs text-center text-gray-500 mt-3">
+            Bạn sẽ được chuyển hướng đến cổng thanh toán an toàn của VNPAY.
+          </p>
         </form>
 
         {toastMessage && (
-          <div className="my-4">
+          <div className="mt-4">
             <Toast
               message={toastMessage}
               type={'error'}
@@ -283,20 +284,7 @@ const Checkout = () => {
   );
 };
 
-/**
- * Generic Input field component for collecting user information.
- * @param {Object} props The component props.
- * @param {string} props.label The input field label.
- * @param {string} props.type The input field type.
- * @param {string} props.name The input field name.
- * @param {string} props.value The input field value.
- * @param {Function} props.onChange The input field change handler.
- * @param {string} props.placeholder The input field placeholder.
- * @param {boolean} props.required The input field required status.
- * @param {boolean} props.error The input field error status.
- *
- * @returns {JSX.Element} The rendered InputField component.
- */
+// Component InputField giữ nguyên (hoặc copy lại nếu cần)
 const InputField = ({
   label,
   type,
@@ -312,7 +300,7 @@ const InputField = ({
       className="block text-gray-700 text-sm font-bold mb-2"
       htmlFor={name}
     >
-      {label}
+      {label} <span className="text-red-500">{required && '*'}</span>
     </label>
     <input
       className={`shadow appearance-none border ${
@@ -324,28 +312,11 @@ const InputField = ({
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      required={required}
-      aria-invalid={error ? 'true' : 'false'}
     />
     {error && (
-      <p className="text-red-500 text-xs my-1">
-        Bạn cần kiểm tra lại thông tin này!
-      </p>
+      <p className="text-red-500 text-xs my-1">Thông tin này là bắt buộc.</p>
     )}
   </div>
 );
-
-// Validation schema for form fields
-const validationSchema = {
-  email: (value) => /\S+@\S+\.\S+/.test(value),
-  nameOnCard: (value) => value.trim() !== '',
-  cardNumber: (value) => /^\d{16}$/.test(value), // Simplistic validation: just check if it has 16 digits.
-  expiry: (value) => /^(0[1-9]|1[0-2])\/\d{2}$/.test(value), // MM/YY format
-  cvc: (value) => /^\d{3,4}$/.test(value), // 3 or 4 digits
-  address: (value) => value.trim() !== '',
-  city: (value) => value.trim() !== '',
-  state: (value) => value.trim() !== '',
-  postalCode: (value) => /^\d{5}(-\d{4})?$/.test(value),
-};
 
 export default Checkout;

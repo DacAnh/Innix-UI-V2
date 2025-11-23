@@ -191,3 +191,17 @@ export const callPaymentCallback = (params) => {
 export const callCreateVnPayUrl = (bookingId) => {
   return axios.post(`/api/v2/payment/create-vnpay-url?bookingId=${bookingId}`);
 };
+
+// === WALLET API ===
+export const callFetchMyWallet = () => {
+  return axios.get('/api/v2/wallet/me');
+};
+
+export const callFetchTransactions = (query) => {
+  return axios.get(`/api/v2/wallet/transactions?${query}`);
+};
+
+export const callRequestWithdraw = (data) => {
+  // data gồm: amount, bankName, bankAccountNumber, accountHolderName...
+  return axios.post('/api/v2/wallet/withdraw', data);
+};

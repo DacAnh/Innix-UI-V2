@@ -26,6 +26,7 @@ import AccommodationPage from './pages/admin/accommodation';
 import RoomTypePage from './pages/admin/accommodation/room-types'; // Mới
 import BookingPage from './pages/admin/booking'; // Mới
 import HotelsPage from './pages/hotel/index';
+import WalletPage from './pages/admin/wallet';
 
 // if (process.env.NODE_ENV === 'development') {
 // makeServer();
@@ -114,6 +115,7 @@ const router = createBrowserRouter([
       { path: 'accommodation', element: <AccommodationPage /> },
       { path: 'accommodation/:id/room-types', element: <RoomTypePage /> },
       { path: 'booking', element: <BookingPage /> },
+      { path: 'wallet', element: <WalletPage /> },
     ],
   },
 ]);

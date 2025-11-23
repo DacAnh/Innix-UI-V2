@@ -13,6 +13,7 @@ import {
   SafetyCertificateOutlined,
   HomeOutlined, // Thêm
   ShoppingCartOutlined, // Thêm
+  WalletOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar } from 'antd';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
@@ -76,6 +77,11 @@ const LayoutAdmin = () => {
       label: <Link to="/admin/booking">Quản lý đơn hàng</Link>,
       key: 'booking',
       icon: <ShoppingCartOutlined />,
+    },
+    {
+      label: <Link to="/admin/wallet">Ví của tôi</Link>,
+      key: 'wallet',
+      icon: <WalletOutlined />,
     },
   ];
 

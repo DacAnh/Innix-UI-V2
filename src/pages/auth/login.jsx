@@ -4,7 +4,6 @@ import { callLogin } from '../../services/auth.service';
 import { AuthContext } from 'contexts/AuthContext';
 import validations from 'config/utils/validations';
 import Toast from 'components/share/toast/Toast';
-import { LOGIN_MESSAGES } from 'config/constants';
 import { toast } from 'react-toastify';
 
 const Login = () => {

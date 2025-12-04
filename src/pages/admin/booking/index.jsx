@@ -5,6 +5,7 @@ import {
   callUpdateBookingStatus,
 } from '../../../services/booking.service';
 import moment from 'moment';
+import { BOOKING_STATUS, STATUS_COLOR } from '../../../config/constants';
 
 const BookingPage = () => {
   const [listData, setListData] = useState([]);
@@ -69,19 +70,19 @@ const BookingPage = () => {
           style={{ width: 140 }}
           onChange={(value) => handleStatusChange(record.id, value)}
           // Chỉ cho phép đổi nếu đang PENDING
-          disabled={status !== 'PENDING'}
+          disabled={status !== BOOKING_STATUS.PENDING}
         >
           <Select.Option value="PENDING">
-            <Tag color="orange">Chờ duyệt</Tag>
+            <Tag color={STATUS_COLOR[BOOKING_STATUS.PENDING]}>Chờ duyệt</Tag>
           </Select.Option>
           <Select.Option value="CONFIRMED">
-            <Tag color="green">Đã duyệt</Tag>
+            <Tag color={STATUS_COLOR[BOOKING_STATUS.CONFIRMED]}>Đã duyệt</Tag>
           </Select.Option>
           <Select.Option value="CANCELLED">
-            <Tag color="red">Hủy</Tag>
+            <Tag color={STATUS_COLOR[BOOKING_STATUS.CANCELLED]}>Hủy</Tag>
           </Select.Option>
           <Select.Option value="COMPLETED">
-            <Tag color="blue">Hoàn thành</Tag>
+            <Tag color={STATUS_COLOR[BOOKING_STATUS.COMPLETED]}>Hoàn thành</Tag>
           </Select.Option>
         </Select>
       ),

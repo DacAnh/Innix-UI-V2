@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../../../contexts/AuthContext';
 import NotPermitted from './not-permitted';
+import { ADMIN_MODULES } from '../../../config/constants';
 
 const ProtectedRoute = (props) => {
   const { isAuthenticated, user } = useContext(AuthContext);
@@ -10,21 +11,22 @@ const ProtectedRoute = (props) => {
   // Có thể mở rộng logic này: Check permission cụ thể thay vì check role
   const isAdminRoute = window.location.pathname.startsWith('/admin');
   const permissions = user?.role?.permissions || [];
-  const adminModules = [
-    'USERS',
-    'ROLES',
-    'PERMISSIONS',
-    // 'DASHBOARD',
-    'ACCOMMODATIONS',
-    'ACCOMMODATION-TYPES',
-    // 'PARTNER_PORTAL',
-    'ROOM-TYPES',
-    'FILES',
-    'AMENITIES',
-    'WALLET',
-  ];
+  // const adminModules = [
+  //   'USERS',
+  //   'ROLES',
+  //   'PERMISSIONS',
+  //   // 'DASHBOARD',
+  //   'ACCOMMODATIONS',
+  //   'ACCOMMODATION-TYPES',
+  //   // 'PARTNER_PORTAL',
+  //   'ROOM-TYPES',
+  //   'FILES',
+  //   'AMENITIES',
+  //   'WALLET',
+  // ];
+  const adminModulesList = Object.values(ADMIN_MODULES);
   const hasAdminAccess = permissions.some(
-    (p) => p.module && adminModules.includes(p.module.trim())
+    (p) => p.module && adminModulesList.includes(p.module.trim())
   );
 
   // Logic bảo vệ:

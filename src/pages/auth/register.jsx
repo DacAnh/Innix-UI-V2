@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'config/axios-customize';
 import Toast from 'components/share/toast/Toast';
-import { REGISTRATION_MESSAGES } from 'config/constants';
 import { callRegister } from '../../services/auth.service';
 import { Formik, Form, Field } from 'formik';
 import Schemas from 'config/utils/validation-schemas';
 import { toast } from 'react-toastify';
+import { GENDER } from '../../config/constants';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const Register = () => {
     fullName: '',
     phone: '',
     age: '',
-    gender: 'MALE', // Giá trị mặc định khớp với Enum Gender trong Java
+    gender: GENDER.MALE, // Giá trị mặc định khớp với Enum Gender trong Java
     address: '',
   });
 
@@ -191,9 +191,9 @@ const Register = () => {
                     onChange={handleInputChange}
                     className={inputClass}
                   >
-                    <option value="MALE">Nam</option>
-                    <option value="FEMALE">Nữ</option>
-                    <option value="OTHER">Khác</option>
+                    <option value={GENDER.MALE}>Nam</option>
+                    <option value={GENDER.FEMALE}>Nữ</option>
+                    <option value={GENDER.OTHER}>Khác</option>
                   </select>
                 </div>
               </div>

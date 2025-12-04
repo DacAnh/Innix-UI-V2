@@ -5,6 +5,7 @@ import { callFetchAccommodationType } from '../../../services/accommodation.serv
 import { callLogout } from '../../../services/auth.service';
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../../contexts/AuthContext';
+import { ADMIN_MODULES } from '../../../config/constants';
 
 const NavbarItems = ({ onHamburgerMenuToggle }) => {
   const navigate = useNavigate();
@@ -27,21 +28,22 @@ const NavbarItems = ({ onHamburgerMenuToggle }) => {
   }, []);
 
   const permissions = user?.role?.permissions || [];
-  const adminModules = [
-    'USERS',
-    'ROLES',
-    'PERMISSIONS',
-    // 'DASHBOARD',
-    'ACCOMMODATIONS',
-    'ACCOMMODATION-TYPES',
-    // 'PARTNER_PORTAL',
-    'ROOM-TYPES',
-    'FILES',
-    'AMENITIES',
-    'WALLET',
-  ];
+  // const adminModulesList = [
+  //   'USERS',
+  //   'ROLES',
+  //   'PERMISSIONS',
+  //   // 'DASHBOARD',
+  //   'ACCOMMODATIONS',
+  //   'ACCOMMODATION-TYPES',
+  //   // 'PARTNER_PORTAL',
+  //   'ROOM-TYPES',
+  //   'FILES',
+  //   'AMENITIES',
+  //   'WALLET',
+  // ];
+  const adminModulesList = Object.values(ADMIN_MODULES);
   const hasAdminAccess = permissions.some(
-    (p) => p.module && adminModules.includes(p.module.trim())
+    (p) => p.module && adminModulesList.includes(p.module.trim())
   );
 
   const handleLogout = async () => {

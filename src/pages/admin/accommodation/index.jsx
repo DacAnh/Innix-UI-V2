@@ -24,6 +24,7 @@ import ModalAccommodation from '../../../components/admin/accommodation/modal.ac
 import Access from '../../../components/share/access';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext';
+import { ROLES } from '../../../config/constants';
 
 const AccommodationPage = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const AccommodationPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [dataInit, setDataInit] = useState(null);
 
-  const isAdmin = user?.role?.name === 'ADMIN';
+  const isAdmin = user?.role?.name === ROLES.ADMIN;
 
   const fetchData = async () => {
     setIsLoading(true);

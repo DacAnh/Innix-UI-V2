@@ -20,7 +20,7 @@ import { Layout, Menu, Dropdown, Space, message, Avatar } from 'antd';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
-import { callLogout } from '../../config/api';
+import { callLogout } from '../../services/auth.service';
 import './layout.admin.scss';
 
 const { Header, Sider, Content, Footer } = Layout;

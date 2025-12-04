@@ -7,7 +7,10 @@ import {
   BankOutlined,
 } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import { callFetchMyWallet, callFetchTransactions } from '../../../config/api';
+import {
+  callFetchMyWallet,
+  callFetchTransactions,
+} from '../../../services/wallet.service';
 import ModalWithdraw from './modal.withdraw';
 import moment from 'moment';
 

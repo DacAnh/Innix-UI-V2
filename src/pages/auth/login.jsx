@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { callLogin } from '../../config/api';
+import { callLogin } from '../../services/auth.service';
 import { AuthContext } from 'contexts/AuthContext';
 import validations from 'config/utils/validations';
 import Toast from 'components/share/toast/Toast';

@@ -20,7 +20,7 @@ import {
   callFetchAdminTransactions,
   callApproveWithdrawal,
   callRejectWithdrawal,
-} from '../../../config/api';
+} from '../../../services/wallet.service';
 import moment from 'moment';
 
 const TransactionPage = () => {

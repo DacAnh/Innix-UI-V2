@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   callFetchBookings,
   callUpdateBookingStatus,
-} from '../../../config/api';
+} from '../../../services/booking.service';
 import moment from 'moment';
 
 const BookingPage = () => {

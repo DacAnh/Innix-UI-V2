@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Slider from 'react-slick';
-import { callFetchAllAccommodation } from '../../../../config/api'; // API chung
+import { callFetchAllAccommodation } from '../../../../services/accommodation.service'; // API chung
 import HotelCard from '../../../../components/client/card/hotel.card'; // Dùng lại Card cũ
 import { Spin, Button } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';

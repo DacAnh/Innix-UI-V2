@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { callFetchAccount } from '../config/api';
+import { callFetchAccount } from '../services/auth.service';
 
 export const AuthContext = createContext({
   isAuthenticated: false,

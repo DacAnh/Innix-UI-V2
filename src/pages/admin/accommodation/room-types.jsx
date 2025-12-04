@@ -20,12 +20,12 @@ import {
   HomeOutlined,
   DollarOutlined,
 } from '@ant-design/icons';
+import { callFetchAccommodationById } from '../../../services/accommodation.service';
 import {
   callDeleteRoomType,
   callFetchRoomTypesByAccommodation,
-  callFetchAccommodationById,
   callUpdateRoomAvailability,
-} from '../../../config/api';
+} from '../../../services/room.service';
 import { useParams, Link } from 'react-router-dom';
 import ModalRoomType from '../../../components/admin/accommodation/modal.room-type'; // Modal tạo/sửa thông tin cơ bản
 import moment from 'moment';

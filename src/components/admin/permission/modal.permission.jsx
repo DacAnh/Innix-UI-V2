@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   callCreatePermission,
   callUpdatePermission,
-} from '../../../config/api';
+} from '../../../services/role.service';
 
 const ModalPermission = (props) => {
   const { openModal, setOpenModal, fetchData, dataInit, setDataInit } = props;

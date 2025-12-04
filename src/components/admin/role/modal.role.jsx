@@ -16,7 +16,7 @@ import {
   callCreateRole,
   callUpdateRole,
   callFetchPermission,
-} from '../../../config/api';
+} from '../../../services/role.service';
 import _ from 'lodash';
 
 const ModalRole = (props) => {

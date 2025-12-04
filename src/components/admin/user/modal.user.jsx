@@ -8,11 +8,9 @@ import {
   Select,
 } from 'antd';
 import { useEffect, useState } from 'react';
-import {
-  callCreateUser,
-  callUpdateUser,
-  callFetchRole,
-} from '../../../config/api';
+import { callCreateUser, callUpdateUser } from '../../../services/user.service';
+
+import { callFetchRole } from '../../../services/role.service';
 
 const ModalUser = (props) => {
   const { openModal, setOpenModal, fetchUser, dataInit, setDataInit } = props;

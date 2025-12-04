@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import {
   callCreateAccommodationType,
   callUpdateAccommodationType,
-  callUploadFile,
-} from '../../../config/api';
+} from '../../../services/accommodation.service';
+import { callUploadFile } from '../../../services/file.service';
 
 const ModalAccommodationType = (props) => {
   const { openModal, setOpenModal, fetchData, dataInit, setDataInit } = props;

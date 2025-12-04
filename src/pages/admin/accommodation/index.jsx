@@ -19,10 +19,9 @@ import {
   callFetchAllAccommodation,
   callFetchMyAccommodation,
   callFetchAccommodationById,
-} from '../../../config/api';
+} from '../../../services/accommodation.service';
 import ModalAccommodation from '../../../components/admin/accommodation/modal.accommodation';
 import Access from '../../../components/share/access';
-import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../contexts/AuthContext';
 

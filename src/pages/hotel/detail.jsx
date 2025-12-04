@@ -1,10 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import {
-  callFetchPublicAccommodationById,
-  callFetchPublicRoomTypes,
-  callCheckRoomAvailability,
-} from '../../config/api';
+import { callFetchPublicAccommodationById } from '../../services/accommodation.service';
+import { callFetchPublicRoomTypes } from '../../services/room.service';
+import { callCheckRoomAvailability } from '../../services/booking.service';
 import HotelDetailsViewCard from './components/hotel-details-view-card/HotelDetailsViewCard';
 import HotelBookingDetailsCard from './components/hotel-booking-details-card/HotelBookingDetailsCard';
 import HotelDetailsViewCardSkeleton from './components/hotel-details-view-card-skeleton/HotelDetailsViewCardSkeleton';

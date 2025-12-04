@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'config/axios-customize';
 import Toast from 'components/share/toast/Toast';
 import { REGISTRATION_MESSAGES } from 'config/constants';
-import { callRegister } from '../../config/api';
+import { callRegister } from '../../services/auth.service';
 import { Formik, Form, Field } from 'formik';
 import Schemas from 'config/utils/validation-schemas';
 import { toast } from 'react-toastify';

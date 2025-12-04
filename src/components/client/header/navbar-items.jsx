@@ -1,6 +1,8 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import DropdownButton from '../../share/dropdown-button/DropdownButton';
-import { callLogout, callFetchAccommodationType } from '../../../config/api';
+import { callFetchAccommodationType } from '../../../services/accommodation.service';
+
+import { callLogout } from '../../../services/auth.service';
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../../contexts/AuthContext';
 

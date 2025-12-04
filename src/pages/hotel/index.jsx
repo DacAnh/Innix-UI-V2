@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'; // Hook để l
 import {
   callFetchPublicAccommodations,
   callFetchAccommodationTypeById,
-} from '../../config/api';
+} from '../../services/accommodation.service';
 import HotelCard from '../../components/client/card/hotel.card';
 import { Spin, Breadcrumb, Empty, Pagination } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';

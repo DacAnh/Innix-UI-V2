@@ -1,7 +1,10 @@
 import { Table, Button, Space, Popconfirm, message, notification } from 'antd';
 import { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { callDeletePermission, callFetchPermission } from '../../../config/api';
+import {
+  callDeletePermission,
+  callFetchPermission,
+} from '../../../services/role.service';
 import ModalPermission from '../../../components/admin/permission/modal.permission';
 import moment from 'moment';
 

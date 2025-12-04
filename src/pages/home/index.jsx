@@ -1,6 +1,6 @@
 import HeroCover from './components/hero-cover/HeroCover';
 import { useState, useEffect } from 'react';
-import { callFetchAccommodationType } from '../../config/api';
+import { callFetchAccommodationType } from '../../services/accommodation.service';
 import AccommodationSection from './components/accommodation-section/AccommodationSection'; // Import Component mới
 import { Spin } from 'antd';
 

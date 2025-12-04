@@ -1,7 +1,7 @@
 import { Table, Button, Space, Popconfirm, message, Tag } from 'antd';
 import { useEffect, useState } from 'react';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { callDeleteRole, callFetchRole } from '../../../config/api';
+import { callDeleteRole, callFetchRole } from '../../../services/role.service';
 import ModalRole from '../../../components/admin/role/modal.role';
 import moment from 'moment';
 

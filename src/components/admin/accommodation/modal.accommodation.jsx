@@ -19,8 +19,8 @@ import {
   callUpdateAccommodation,
   callFetchAccommodationType,
   callFetchAmenities,
-  callUploadFile,
-} from '../../../config/api';
+} from '../../../services/accommodation.service';
+import { callUploadFile } from '../../../services/file.service';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 

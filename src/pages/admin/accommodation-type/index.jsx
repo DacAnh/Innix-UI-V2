@@ -12,7 +12,7 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   callDeleteAccommodationType,
   callFetchAccommodationType,
-} from '../../../config/api';
+} from '../../../services/accommodation.service';
 import ModalAccommodationType from '../../../components/admin/accommodation-type/modal.type';
 import Access from '../../../components/share/access'; // Đừng quên phân quyền!
 

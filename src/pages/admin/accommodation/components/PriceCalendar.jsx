@@ -6,7 +6,7 @@ import { Modal, Form, InputNumber, Button, message, Spin } from 'antd';
 import {
   callFetchRoomAvailability,
   callUpdateRoomAvailability,
-} from '../../../../config/api';
+} from '../../../../services/room.service';
 
 const localizer = momentLocalizer(moment);
 

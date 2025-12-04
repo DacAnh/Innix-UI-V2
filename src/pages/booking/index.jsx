@@ -6,7 +6,10 @@ import { useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext'; // Sửa lại đường dẫn import
 import Loader from '../../components/share/loader/loader'; // Sửa lại đường dẫn import
 import Toast from '../../components/share/toast/Toast'; // Sửa lại đường dẫn import
-import { callCreateBooking, callCreateVnPayUrl } from '../../config/api'; // Import API
+import {
+  callCreateBooking,
+  callCreateVnPayUrl,
+} from '../../services/booking.service'; // Import API
 
 const Checkout = () => {
   const [errors, setErrors] = useState({});

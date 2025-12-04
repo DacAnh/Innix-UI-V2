@@ -14,6 +14,7 @@ import {
   HomeOutlined, // Thêm
   ShoppingCartOutlined, // Thêm
   WalletOutlined,
+  DollarCircleOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar } from 'antd';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
@@ -82,6 +83,11 @@ const LayoutAdmin = () => {
       label: <Link to="/admin/wallet">Ví của tôi</Link>,
       key: 'wallet',
       icon: <WalletOutlined />,
+    },
+    {
+      label: <Link to="/admin/transactions">Quản lý Giao dịch</Link>,
+      key: 'transactions',
+      icon: <DollarCircleOutlined />,
     },
   ];
 

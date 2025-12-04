@@ -205,3 +205,19 @@ export const callRequestWithdraw = (data) => {
   // data gồm: amount, bankName, bankAccountNumber, accountHolderName...
   return axios.post('/api/v2/wallet/withdraw', data);
 };
+
+// === ADMIN TRANSACTION API ===
+// URL: /api/v2/admin/transactions
+export const callFetchAdminTransactions = (query) => {
+  return axios.get(`/api/v2/admin/transactions?${query}`);
+};
+
+export const callApproveWithdrawal = (id, data) => {
+  // data: { bankTransactionCode, adminNote }
+  return axios.put(`/api/v2/admin/transactions/${id}/approve`, data);
+};
+
+export const callRejectWithdrawal = (id, data) => {
+  // data: { rejectReason }
+  return axios.put(`/api/v2/admin/transactions/${id}/reject`, data);
+};

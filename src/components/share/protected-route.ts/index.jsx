@@ -14,12 +14,14 @@ const ProtectedRoute = (props) => {
     'USERS',
     'ROLES',
     'PERMISSIONS',
-    'DASHBOARD',
+    // 'DASHBOARD',
     'ACCOMMODATIONS',
-    'ROOMS',
-    'ACCOMMODATION_TYPES',
-    'PARTNER_PORTAL',
-    'ROOM_TYPES',
+    'ACCOMMODATION-TYPES',
+    // 'PARTNER_PORTAL',
+    'ROOM-TYPES',
+    'FILES',
+    'AMENITIES',
+    'WALLET',
   ];
   const hasAdminAccess = permissions.some(
     (p) => p.module && adminModules.includes(p.module.trim())

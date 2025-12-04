@@ -122,7 +122,7 @@ const AccommodationPage = () => {
           permission={{
             method: 'GET',
             apiPath: '/api/v2/partner/accommodations/{id}/room-types',
-            module: 'ROOM_TYPES',
+            module: 'ROOM-TYPES',
           }}
           hideChildren
         >

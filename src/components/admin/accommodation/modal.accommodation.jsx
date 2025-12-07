@@ -1,28 +1,17 @@
-import {
-  Modal,
-  Form,
-  Input,
-  message,
-  notification,
-  Select,
-  Tabs,
-  Row,
-  Col,
-  InputNumber,
-  Checkbox,
-  Upload,
-} from 'antd';
-import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
+import { Modal, Form, Tabs, message, notification } from 'antd';
 import { useEffect, useState } from 'react';
 import {
   callCreateAccommodation,
   callUpdateAccommodation,
   callFetchAccommodationType,
   callFetchAmenities,
-} from '../../../services/accommodation.service';
+} from '../../../services/accommodation.service'; // Chú ý đường dẫn import
 import { callUploadFile } from '../../../services/file.service';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+
+// Import Tabs con
+import InfoTab from './tabs/InfoTab';
+import AddressTab from './tabs/AddressTab';
+import AmenitiesTab from './tabs/AmenitiesTab';
 
 const ModalAccommodation = (props) => {
   const { openModal, setOpenModal, fetchData, dataInit, setDataInit } = props;
@@ -39,7 +28,7 @@ const ModalAccommodation = (props) => {
 
   // Upload States
   const [loadingUpload, setLoadingUpload] = useState(false);
-  const [dataImage, setDataImage] = useState([]); // Chứa file ảnh bìa
+  const [fileList, setFileList] = useState([]);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [previewTitle, setPreviewTitle] = useState('');
@@ -47,9 +36,8 @@ const ModalAccommodation = (props) => {
   // 1. Fetch Data (Loại hình & Tiện ích)
   useEffect(() => {
     const fetchPrerequisites = async () => {
-      // Lấy Loại hình
       const resType = await callFetchAccommodationType(`page=1&size=100`);
-      if (resType && resType.statusCode === 200) {
+      if (resType?.statusCode === 200) {
         setTypeOptions(
           resType.data.result.map((item) => ({
             label: item.displayName,
@@ -57,10 +45,8 @@ const ModalAccommodation = (props) => {
           }))
         );
       }
-
-      // Lấy Tiện ích
       const resAmenity = await callFetchAmenities(`page=1&size=100`);
-      if (resAmenity && resAmenity.statusCode === 200) {
+      if (resAmenity?.statusCode === 200) {
         setAmenityOptions(
           resAmenity.data.result.map((item) => ({
             label: item.name,
@@ -69,98 +55,79 @@ const ModalAccommodation = (props) => {
         );
       }
     };
-
-    if (openModal) {
-      fetchPrerequisites();
-    }
+    if (openModal) fetchPrerequisites();
   }, [openModal]);
 
-  // 2. Fill Data khi Edit
+  // 2. Fill Data
   useEffect(() => {
     if (openModal) {
       if (dataInit?.id) {
-        // --- Xử lý dữ liệu khi Sửa ---
+        // Edit Mode
         const accommodationTypeId = dataInit.type ? dataInit.type.id : null;
         const amenityIds = dataInit.amenities
           ? dataInit.amenities.map((a) => a.id)
           : [];
 
-        // Xử lý ảnh bìa
+        // Fill ảnh
         if (dataInit.thumbnailImageUrl) {
-          // Kiểm tra xem DB lưu full URL hay tên file
           const isFullUrl = dataInit.thumbnailImageUrl.startsWith('http');
           const url = isFullUrl
             ? dataInit.thumbnailImageUrl
             : `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${dataInit.thumbnailImageUrl}`;
-
-          setDataImage([
+          setFileList([
             {
               uid: '-1',
-              name: dataInit.thumbnailImageUrl, // Lưu tên file gốc
+              name: dataInit.thumbnailImageUrl,
               status: 'done',
-              url: url,
+              url,
             },
           ]);
         } else {
-          setDataImage([]);
+          setFileList([]);
         }
 
-        form.setFieldsValue({
-          ...dataInit,
-          accommodationTypeId: accommodationTypeId,
-          amenityIds: amenityIds,
-        });
+        form.setFieldsValue({ ...dataInit, accommodationTypeId, amenityIds });
         setDescription(dataInit.description || '');
       } else {
-        // --- Reset khi Tạo mới ---
+        // Create Mode
         form.resetFields();
         setDescription('');
-        setDataImage([]);
+        setFileList([]);
       }
-
-      // Hack để render Tabs đúng cách
       setTimeout(() => setIsTabsReady(true), 50);
     } else {
       setIsTabsReady(false);
     }
-  }, [dataInit, openModal, form]); // Bỏ typeOptions khỏi dependency để tránh reset form
+  }, [dataInit, openModal, form]);
 
   const handleCancel = () => {
     setOpenModal(false);
     setDataInit(null);
     form.resetFields();
     setDescription('');
-    setDataImage([]);
+    setFileList([]);
     setIsTabsReady(false);
   };
 
-  // === LOGIC UPLOAD ẢNH ===
-  const handleUploadFileImage = async ({ file, onSuccess, onError }) => {
+  // Upload Logic
+  const handleUpload = async ({ file, onSuccess, onError }) => {
     setLoadingUpload(true);
     try {
       const res = await callUploadFile(file, 'accommodations');
       if (res && res.statusCode === 200) {
         const fileName = res.data.fileName;
         const url = `${import.meta.env.VITE_BACKEND_URL}/storage/accommodations/${fileName}`;
-
-        // Tạo object file chuẩn
         const newFile = {
           uid: file.uid,
           name: fileName,
           status: 'done',
-          url: url,
+          url,
           response: { fileName, url },
         };
-
-        // ✅ CẬP NHẬT STATE TRỰC TIẾP TẠI ĐÂY
-        setDataImage([newFile]);
-
+        setFileList([newFile]);
         onSuccess('ok');
-      } else {
-        onError('Lỗi upload');
-      }
+      } else onError('Lỗi upload');
     } catch (error) {
-      console.log(error);
       onError('Lỗi upload');
     }
     setLoadingUpload(false);
@@ -185,43 +152,17 @@ const ModalAccommodation = (props) => {
       reader.onerror = (error) => reject(error);
     });
 
-  const handleChange = ({ fileList }) => {
-    // Nếu fileList rỗng (người dùng xóa ảnh), cập nhật state rỗng
-    if (fileList.length === 0) {
-      setDataImage([]);
-    }
+  const handleChange = ({ fileList: newFileList }) => {
+    if (newFileList.length === 0) setFileList([]);
   };
 
-  // === SUBMIT ===
-
+  // Submit Logic
   const onFinish = async (values) => {
-    const {
-      name,
-      country,
-      province,
-      district,
-      ward,
-      addressLine,
-      contactPhone,
-      contactEmail,
-      accommodationTypeId,
-      amenityIds,
-      latitude,
-      longitude,
-    } = values;
-
-    // === 1. LOGIC LẤY URL ẢNH (SỬA LẠI CHO CHẮC CHẮN) ===
+    // 1. Get Thumbnail
     let thumbnailImageUrl = '';
-    if (dataImage.length > 0) {
-      // Nếu là ảnh mới upload -> lấy từ name (do handleUpload đã gán fileName vào name)
-      // Nếu là ảnh cũ -> lấy từ name (do useEffect đã gán)
-      thumbnailImageUrl = dataImage[0].name;
-
-      // Trường hợp đặc biệt: Nếu name là full URL (do logic cũ nào đó), ta phải cắt lấy tên file
-      // Nhưng với logic chuẩn ở trên, name luôn là fileName (vd: "abc.jpg")
+    if (fileList.length > 0) {
+      thumbnailImageUrl = fileList[0].name;
     }
-
-    console.log('DEBUG Submit:', { dataImage, thumbnailImageUrl });
 
     if (!thumbnailImageUrl) {
       notification.error({
@@ -231,42 +172,26 @@ const ModalAccommodation = (props) => {
       return;
     }
 
-    // === 3. TẠO PAYLOAD ===
+    // 2. Payload
     const payload = {
-      name,
-      description: description, // Lấy từ state ReactQuill
-      totalRoom: values.totalRoom,
-      country,
-      province,
-      district,
-      ward,
-      addressLine,
-      contactPhone,
-      contactEmail,
+      ...values,
+      description,
+      thumbnailImageUrl,
       isPriority: values.isPriority || false,
       priorityLevel: values.priorityLevel || 0,
       autoApproveBookings: values.autoApproveBookings || false,
-
-      accommodationTypeId,
-      amenityIds: amenityIds || [],
-
-      thumbnailImageUrl: thumbnailImageUrl, // ✅ Đảm bảo biến này có giá trị
-      latitude: latitude || null,
-      longitude: longitude || null,
+      amenityIds: values.amenityIds || [],
+      latitude: values.latitude || null,
+      longitude: values.longitude || null,
     };
 
-    console.log('Payload gửi đi:', payload); // Xem cái này trong F12 Console
-
     setIsSubmit(true);
+    const apiCall = dataInit?.id
+      ? callUpdateAccommodation(dataInit.id, payload)
+      : callCreateAccommodation(payload);
+    const res = await apiCall;
 
-    let res;
-    if (dataInit?.id) {
-      res = await callUpdateAccommodation(dataInit.id, payload);
-    } else {
-      res = await callCreateAccommodation(payload);
-    }
-
-    if (res && (res.statusCode === 200 || res.statusCode === 201)) {
+    if (res?.statusCode === 200 || res?.statusCode === 201) {
       message.success(
         dataInit?.id ? 'Cập nhật thành công' : 'Tạo mới thành công'
       );
@@ -281,146 +206,33 @@ const ModalAccommodation = (props) => {
     setIsSubmit(false);
   };
 
+  // Tabs Configuration
   const tabItems = [
     {
       key: 'info',
       label: `Thông tin cơ bản`,
       children: (
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Tên Chỗ ở"
-              name="name"
-              rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Loại hình"
-              name="accommodationTypeId"
-              rules={[{ required: true, message: 'Vui lòng chọn loại hình!' }]}
-            >
-              <Select placeholder="Chọn loại hình" options={typeOptions} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="SĐT Liên hệ"
-              name="contactPhone"
-              rules={[{ required: true }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Email Liên hệ"
-              name="contactEmail"
-              rules={[{ required: true, type: 'email' }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item label="Ảnh bìa (Thumbnail)">
-              <Upload
-                name="thumbnail"
-                listType="picture-card"
-                className="avatar-uploader"
-                maxCount={1}
-                multiple={false}
-                customRequest={handleUploadFileImage}
-                onChange={handleChange}
-                onPreview={handlePreview}
-                fileList={dataImage}
-              >
-                {dataImage.length < 1 && (
-                  <div>
-                    {loadingUpload ? <LoadingOutlined /> : <PlusOutlined />}
-                    <div style={{ marginTop: 8 }}>Upload</div>
-                  </div>
-                )}
-              </Upload>
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item label="Mô tả chi tiết">
-              <ReactQuill
-                theme="snow"
-                value={description}
-                onChange={setDescription}
-                style={{ height: 200, marginBottom: 50 }}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+        <InfoTab
+          typeOptions={typeOptions}
+          description={description}
+          setDescription={setDescription}
+          fileList={fileList}
+          loadingUpload={loadingUpload}
+          handleUpload={handleUpload}
+          handleChange={handleChange}
+          handlePreview={handlePreview}
+        />
       ),
     },
     {
       key: 'address',
       label: `Địa chỉ`,
-      children: (
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              label="Quốc gia"
-              name="country"
-              rules={[{ required: true }]}
-              initialValue={'Việt Nam'}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Tỉnh/Thành phố"
-              name="province"
-              rules={[{ required: true }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Phường/Xã"
-              name="ward"
-              rules={[{ required: true }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              label="Địa chỉ chi tiết"
-              name="addressLine"
-              rules={[{ required: true }]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Vĩ độ (Lat)" name="latitude">
-              <InputNumber style={{ width: '100%' }} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="Kinh độ (Long)" name="longitude">
-              <InputNumber style={{ width: '100%' }} />
-            </Form.Item>
-          </Col>
-        </Row>
-      ),
+      children: <AddressTab />,
     },
     {
       key: 'amenities',
       label: `Tiện ích`,
-      children: (
-        <Form.Item name="amenityIds">
-          <Checkbox.Group options={amenityOptions} />
-        </Form.Item>
-      ),
+      children: <AmenitiesTab amenityOptions={amenityOptions} />,
     },
   ];
 
@@ -433,14 +245,15 @@ const ModalAccommodation = (props) => {
         onCancel={handleCancel}
         confirmLoading={isSubmit}
         width={1000}
+        destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
           {isTabsReady ? (
-            <Tabs defaultActiveKey="info" items={tabItems} forceRender={true} />
+            <Tabs defaultActiveKey="info" items={tabItems} />
           ) : (
             <div
               style={{
-                height: '200px',
+                height: 200,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',

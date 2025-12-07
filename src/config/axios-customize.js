@@ -1,14 +1,18 @@
 import axios from 'axios';
 import { notification } from 'antd';
+import { Mutex } from 'async-mutex'; // Cần cài thêm thư viện này: npm install async-mutex
+
+const mutex = new Mutex(); // Khóa để tránh gọi refresh token nhiều lần cùng lúc
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL, // Ví dụ: http://localhost:8080/api/v2
-  withCredentials: true, // Để nhận cookies nếu backend có gửi
+  baseURL: import.meta.env.VITE_BACKEND_URL,
+  withCredentials: true, // Quan trọng: để gửi Refresh Token (trong cookie) đi
 });
 
-// Gửi Token đi kèm trong mỗi request (nếu đã đăng nhập)
+// === REQUEST INTERCEPTOR ===
 instance.interceptors.request.use(
   function (config) {
+    // Luôn lấy token mới nhất từ localStorage
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
@@ -20,49 +24,112 @@ instance.interceptors.request.use(
   }
 );
 
-// Xử lý dữ liệu trả về (Chỉ lấy phần data cần thiết)
+// === RESPONSE INTERCEPTOR ===
 instance.interceptors.response.use(
   function (response) {
-    // Chúng ta kiểm tra nếu có data thì trả về data đó
-    if (response && response.data) {
-      return response.data;
-    }
+    if (response && response.data) return response.data;
     return response;
   },
-  function (error) {
-    // Lấy data và status từ lỗi
-    const data = error?.response?.data;
-    const status = error?.response?.status;
-
-    // 2. Xử lý lỗi 403 (Access Denied - Cấm truy cập)
-    if (status === 403 && data) {
-      // Hiển thị thông báo lỗi 403 toàn cục
+  async function (error) {
+    // 1. Nếu lỗi không có response (mất mạng, server chết...)
+    if (!error.response) {
       notification.error({
-        message: data.error || 'Không có quyền',
+        message: 'Lỗi kết nối',
+        description: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng.',
+      });
+      return Promise.reject(error);
+    }
+
+    const { config, response } = error;
+    const { status, data } = response;
+
+    // 2. Xử lý Refresh Token khi gặp lỗi 401
+    // Điều kiện: Lỗi 401 + Chưa retry lần nào + Không phải lỗi tại trang login
+    if (
+      status === 401 &&
+      !config._retry &&
+      config.url !== '/api/v2/auth/login' &&
+      config.url !== '/api/v2/auth/refresh'
+    ) {
+      config._retry = true; // Đánh dấu đã retry để tránh lặp vô hạn
+
+      if (!mutex.isLocked()) {
+        const release = await mutex.acquire();
+        try {
+          // Gọi API Refresh Token
+          const res = await instance.post('/api/v2/auth/refresh');
+          if (res && res.data && res.data.access_token) {
+            // Lưu token mới
+            localStorage.setItem('access_token', res.data.access_token);
+            // Cập nhật header cho request đang bị lỗi
+            config.headers['Authorization'] = `Bearer ${res.data.access_token}`;
+            return instance(config); // Gọi lại request cũ
+          } else {
+            // Refresh thất bại (hết hạn refresh token) -> Logout
+            handleLogout();
+            return Promise.reject(error);
+          }
+        } catch (refreshError) {
+          handleLogout();
+          return Promise.reject(refreshError);
+        } finally {
+          release();
+        }
+      } else {
+        // Nếu đang có tiến trình refresh khác chạy, đợi nó xong rồi retry
+        await mutex.waitForUnlock();
+        // Lấy token mới vừa được set
+        const newToken = localStorage.getItem('access_token');
+        if (newToken) {
+          config.headers['Authorization'] = `Bearer ${newToken}`;
+          return instance(config);
+        }
+      }
+    }
+
+    // 3. Xử lý các lỗi khác (400, 403, 500...)
+    if (status === 400 && data) {
+      // Lỗi Validation (thường form sẽ tự handle, không cần popup global nếu muốn)
+      // Hoặc có thể hiện nếu cần
+      return Promise.reject(data); // Trả về data lỗi để component bắt
+    }
+
+    if (status === 403) {
+      notification.error({
+        message: 'Không có quyền truy cập',
         description:
-          data.message || 'Bạn không có quyền thực hiện hành động này.',
+          data?.message || 'Bạn không được phép thực hiện hành động này.',
       });
-      // Vẫn trả về data để logic ở component (nếu có) không bị crash
-      return data;
     }
 
-    // Xử lý lỗi 401 (Unauthorized - Chưa xác thực)
-    // (Bạn có thể thêm logic logout ở đây nếu cần)
-    if (status === 401 && data) {
+    // Lỗi chung chung (500)
+    if (status === 500) {
       notification.error({
-        message: data.error || 'Lỗi xác thực',
-        description: data.message || 'Vui lòng đăng nhập lại.',
+        message: 'Lỗi hệ thống',
+        description: data?.message || 'Có lỗi xảy ra phía máy chủ.',
       });
-      // Tùy chọn: gọi hàm logout tại đây
     }
 
-    // Các lỗi 400 (Validation) hoặc 500 (Server)
-    if (data) {
-      return data; // Trả về cho component tự xử lý (như trang Login, Register)
-    }
-
-    return Promise.reject(error);
+    // Trả về lỗi dạng object chuẩn để component dễ xử lý (error.message)
+    return Promise.reject(data || error);
   }
 );
+
+// Hàm Logout chung
+const handleLogout = () => {
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('user_info'); // Nếu có lưu user
+  // Chuyển hướng về login (nếu đang ở trang cần auth)
+  if (
+    window.location.pathname !== '/login' &&
+    window.location.pathname !== '/'
+  ) {
+    window.location.href = '/login';
+  }
+  notification.error({
+    message: 'Phiên đăng nhập hết hạn',
+    description: 'Vui lòng đăng nhập lại.',
+  });
+};
 
 export default instance;

@@ -36,9 +36,7 @@ const AccommodationTypePage = lazy(
   () => import('./pages/admin/accommodation-type')
 );
 const AccommodationPage = lazy(() => import('./pages/admin/accommodation'));
-const RoomTypePage = lazy(
-  () => import('./pages/admin/accommodation/room-types')
-);
+const RoomTypePage = lazy(() => import('./pages/admin/room-type/room-types'));
 const BookingPage = lazy(() => import('./pages/admin/booking'));
 const WalletPage = lazy(() => import('./pages/admin/wallet'));
 const TransactionPage = lazy(() => import('./pages/admin/transaction'));

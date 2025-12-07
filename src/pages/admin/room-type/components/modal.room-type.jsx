@@ -15,8 +15,8 @@ import { useEffect, useState } from 'react';
 import {
   callCreateRoomType,
   callUpdateRoomType,
-} from '../../../services/room.service';
-import { callUploadFile } from '../../../services/file.service';
+} from '../../../../services/room.service';
+import { callUploadFile } from '../../../../services/file.service';
 
 const ModalRoomType = (props) => {
   const {

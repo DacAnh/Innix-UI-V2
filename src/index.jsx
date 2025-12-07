@@ -1,39 +1,58 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react'; // Import Suspense và lazy
 import ReactDOM from 'react-dom/client';
-import './index.scss';
-import HotelsSearch from './pages/hotel';
-import UserProfile from './pages/user';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
-import Home from './pages/home/index';
 import { AuthProvider } from './contexts/AuthContext';
-import HotelDetails from './pages/hotel/detail';
-import Login from './pages/auth/login';
-import Register from './pages/auth/register';
-import AboutUs from './pages/about-us';
+import './index.scss';
+
+// Import các component chung (Layout, Loading) vẫn giữ nguyên để tải nhanh
 import BaseLayout from './components/share/layout.app';
-import ForgotPassword from './pages/auth/forgot-password';
-import Checkout from 'pages/booking';
-import BookingConfirmation from './pages/booking/confirmation';
 import LayoutAdmin from './components/admin/layout.admin';
-import Dashboard from './pages/admin/dashboard';
-import UserPage from './pages/admin/user';
-import RolePage from './pages/admin/role';
-import PermissionPage from './pages/admin/permission';
-import AccommodationTypePage from './pages/admin/accommodation-type';
 import ProtectedRoute from './components/share/protected-route.ts/index';
-import AccommodationPage from './pages/admin/accommodation';
-import RoomTypePage from './pages/admin/accommodation/room-types'; // Mới
-import BookingPage from './pages/admin/booking'; // Mới
-import HotelsPage from './pages/hotel/index';
-import WalletPage from './pages/admin/wallet';
-import TransactionPage from './pages/admin/transaction';
+import Loading from './components/share/loading'; // Giả sử bạn có component Loading
+
+// --- LAZY LOAD CÁC PAGE ---
+// Client Pages
+const Home = lazy(() => import('./pages/home/index'));
+const HotelsPage = lazy(() => import('./pages/hotel/index'));
+// const HotelsSearch = lazy(() => import('./pages/hotel')); // (Cũ - bỏ nếu không dùng)
+const AboutUs = lazy(() => import('./pages/about-us'));
+const UserProfile = lazy(() => import('./pages/user'));
+const HotelDetails = lazy(() => import('./pages/hotel/detail'));
+const Checkout = lazy(() => import('pages/booking'));
+const BookingConfirmation = lazy(() => import('./pages/booking/confirmation'));
+
+// Auth Pages
+const Login = lazy(() => import('./pages/auth/login'));
+const Register = lazy(() => import('./pages/auth/register'));
+const ForgotPassword = lazy(() => import('./pages/auth/forgot-password'));
+
+// Admin Pages
+const Dashboard = lazy(() => import('./pages/admin/dashboard'));
+const UserPage = lazy(() => import('./pages/admin/user'));
+const RolePage = lazy(() => import('./pages/admin/role'));
+const PermissionPage = lazy(() => import('./pages/admin/permission'));
+const AccommodationTypePage = lazy(
+  () => import('./pages/admin/accommodation-type')
+);
+const AccommodationPage = lazy(() => import('./pages/admin/accommodation'));
+const RoomTypePage = lazy(
+  () => import('./pages/admin/accommodation/room-types')
+);
+const BookingPage = lazy(() => import('./pages/admin/booking'));
+const WalletPage = lazy(() => import('./pages/admin/wallet'));
+const TransactionPage = lazy(() => import('./pages/admin/transaction'));
 
 // if (process.env.NODE_ENV === 'development') {
 // makeServer();
 // }
 
 // makeServer();
+
+// Helper để bọc Suspense cho gọn
+const LazyWrapper = ({ children }) => {
+  return <Suspense fallback={<Loading />}>{children}</Suspense>;
+};
 
 const router = createBrowserRouter([
   {
@@ -42,82 +61,176 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Home />,
+        element: (
+          <LazyWrapper>
+            <Home />
+          </LazyWrapper>
+        ),
       },
-      // {
-      //   path: '/hotels',
-      //   element: <HotelsSearch />,
-      // },
       {
         path: '/hotels',
-        element: <HotelsPage />,
+        element: (
+          <LazyWrapper>
+            <HotelsPage />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/about-us',
-        element: <AboutUs />,
+        element: (
+          <LazyWrapper>
+            <AboutUs />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/user-profile',
-        element: <UserProfile />,
+        element: (
+          <LazyWrapper>
+            <UserProfile />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/login',
-        element: <Login />,
+        element: (
+          <LazyWrapper>
+            <Login />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/register',
-        element: <Register />,
+        element: (
+          <LazyWrapper>
+            <Register />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/hotel/:hotelId',
-        element: <HotelDetails />,
+        element: (
+          <LazyWrapper>
+            <HotelDetails />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/forgot-password',
-        element: <ForgotPassword />,
+        element: (
+          <LazyWrapper>
+            <ForgotPassword />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/checkout',
-        element: <Checkout />,
+        element: (
+          <LazyWrapper>
+            <Checkout />
+          </LazyWrapper>
+        ),
       },
       {
         path: '/booking-confirmation',
-        element: <BookingConfirmation />,
+        element: (
+          <LazyWrapper>
+            <BookingConfirmation />
+          </LazyWrapper>
+        ),
       },
     ],
   },
 
-  // THÊM MỚI NHÁNH ADMIN
+  // ADMIN ROUTES
   {
     path: '/admin',
     element: (
       <ProtectedRoute>
         <LayoutAdmin />
       </ProtectedRoute>
-    ), // Layout riêng cho admin
+    ),
     children: [
       {
         index: true,
-        element: <Dashboard />,
+        element: (
+          <LazyWrapper>
+            <Dashboard />
+          </LazyWrapper>
+        ),
       },
       {
         path: 'user',
-        element: <UserPage />,
+        element: (
+          <LazyWrapper>
+            <UserPage />
+          </LazyWrapper>
+        ),
       },
       {
         path: 'role',
-        element: <RolePage />,
+        element: (
+          <LazyWrapper>
+            <RolePage />
+          </LazyWrapper>
+        ),
       },
       {
         path: 'permission',
-        element: <PermissionPage />,
+        element: (
+          <LazyWrapper>
+            <PermissionPage />
+          </LazyWrapper>
+        ),
       },
-      { path: 'accommodation-type', element: <AccommodationTypePage /> },
-      { path: 'accommodation', element: <AccommodationPage /> },
-      { path: 'accommodation/:id/room-types', element: <RoomTypePage /> },
-      { path: 'booking', element: <BookingPage /> },
-      { path: 'wallet', element: <WalletPage /> },
-      { path: 'transactions', element: <TransactionPage /> },
+      {
+        path: 'accommodation-type',
+        element: (
+          <LazyWrapper>
+            <AccommodationTypePage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'accommodation',
+        element: (
+          <LazyWrapper>
+            <AccommodationPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'accommodation/:id/room-types',
+        element: (
+          <LazyWrapper>
+            <RoomTypePage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'booking',
+        element: (
+          <LazyWrapper>
+            <BookingPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'wallet',
+        element: (
+          <LazyWrapper>
+            <WalletPage />
+          </LazyWrapper>
+        ),
+      },
+      {
+        path: 'transactions',
+        element: (
+          <LazyWrapper>
+            <TransactionPage />
+          </LazyWrapper>
+        ),
+      },
     ],
   },
 ]);

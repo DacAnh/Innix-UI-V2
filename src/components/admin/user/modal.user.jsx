@@ -1,69 +1,54 @@
-import {
-  Modal,
-  Form,
-  Input,
-  message,
-  notification,
-  InputNumber,
-  Select,
-} from 'antd';
+import { Modal, Form, message, notification } from 'antd';
 import { useEffect, useState } from 'react';
 import { callCreateUser, callUpdateUser } from '../../../services/user.service';
-
 import { callFetchRole } from '../../../services/role.service';
+
+// Import component con (Chỉ cần 1 cái)
+import UserInfoTab from './tabs/UserInfoTab';
 
 const ModalUser = (props) => {
   const { openModal, setOpenModal, fetchUser, dataInit, setDataInit } = props;
   const [isSubmit, setIsSubmit] = useState(false);
-  const [roleOptions, setRoleOptions] = useState([]); // State lưu danh sách role
+  const [roleOptions, setRoleOptions] = useState([]);
   const [form] = Form.useForm();
 
-  // 1. Hàm lấy danh sách Role (Lấy hết 1 lần)
+  // 1. Fetch Roles
   useEffect(() => {
     const fetchRoles = async () => {
-      // Lấy 100 role (hoặc số lượng lớn đủ dùng)
       const res = await callFetchRole(`page=1&size=100`);
-      if (res && res.statusCode === 200) {
-        // Map dữ liệu Role thành format cho Select của Ant Design
-        const roles = res.data.result.map((item) => ({
-          label: item.name,
-          value: item.id,
-        }));
-        setRoleOptions(roles);
+      if (res?.statusCode === 200) {
+        setRoleOptions(
+          res.data.result.map((item) => ({ label: item.name, value: item.id }))
+        );
       }
     };
-    // Gọi hàm này khi Modal mở ra
-    if (openModal) {
-      fetchRoles();
-    }
+    if (openModal) fetchRoles();
   }, [openModal]);
 
-  // === LOGIC 1: Khi mở Modal (Edit) -> Tách fullName thành firstName/lastName ===
+  // 2. Fill Data
   useEffect(() => {
     if (openModal && dataInit?.id) {
-      // Tách chuỗi tên
-      const fullName = dataInit.fullName || ''; // Backend trả về fullName
+      // Logic tách tên
+      const fullName = dataInit.fullName || '';
       const lastSpaceIndex = fullName.lastIndexOf(' ');
-      let firstName = '';
+      let firstName = fullName;
       let lastName = '';
 
       if (lastSpaceIndex !== -1) {
-        lastName = fullName.substring(0, lastSpaceIndex); // Họ (phần đầu)
-        firstName = fullName.substring(lastSpaceIndex + 1); // Tên (phần cuối)
-      } else {
-        firstName = fullName; // Trường hợp tên chỉ có 1 từ
+        lastName = fullName.substring(0, lastSpaceIndex);
+        firstName = fullName.substring(lastSpaceIndex + 1);
       }
 
-      // Fill dữ liệu vào form
       form.setFieldsValue({
         ...dataInit,
-        firstName: firstName,
-        lastName: lastName,
-        // Role chỉ cần ID để Select tự map với options
-        role: dataInit.roleUser ? dataInit.roleUser.id : null,
+        firstName,
+        lastName,
+        role: dataInit.roleUser?.id || null,
       });
+    } else {
+      form.resetFields();
     }
-  }, [dataInit, openModal, roleOptions]);
+  }, [dataInit, openModal, form]);
 
   const handleCancel = () => {
     setOpenModal(false);
@@ -72,71 +57,41 @@ const ModalUser = (props) => {
   };
 
   const onFinish = async (values) => {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      age,
-      gender,
-      address,
-      phone,
-      role,
-    } = values;
+    const { firstName, lastName, role, ...otherValues } = values;
 
-    // === LOGIC 2: Gộp firstName + lastName -> fullName để gửi Backend ===
+    // Gộp tên
     const fullName = `${lastName} ${firstName}`.trim();
-    // Role lúc này là ID (value), cần bọc vào object roleUser
-    const roleUserObj = role ? { id: role } : null;
+    // Map role ID sang Object
+    const roleUser = role ? { id: role } : null;
 
-    setIsSubmit(true);
+    const payload = {
+      ...otherValues,
+      fullName,
+      roleUser,
+    };
 
     if (dataInit?.id) {
-      // === UPDATE USER ===
-      const userUpdate = {
-        id: dataInit.id,
-        fullName: fullName,
-        age,
-        gender,
-        address,
-        phone,
-        roleUser: roleUserObj,
-      };
+      payload.id = dataInit.id;
+      delete payload.password;
+    }
 
-      const res = await callUpdateUser(userUpdate);
-      if (res && res.statusCode === 200) {
-        message.success('Cập nhật user thành công');
-        handleCancel();
-        fetchUser();
-      } else {
-        notification.error({
-          message: 'Đã có lỗi xảy ra',
-          description: res.message,
-        });
-      }
+    setIsSubmit(true);
+    const apiCall = dataInit?.id
+      ? callUpdateUser(payload)
+      : callCreateUser(payload);
+    const res = await apiCall;
+
+    if (res?.statusCode === 200 || res?.statusCode === 201) {
+      message.success(
+        dataInit?.id ? 'Cập nhật thành công' : 'Tạo mới thành công'
+      );
+      handleCancel();
+      fetchUser();
     } else {
-      // === CREATE USER ===
-      const userCreate = {
-        fullName: fullName,
-        email,
-        password,
-        age,
-        gender,
-        address,
-        phone,
-        roleUser: roleUserObj,
-      };
-      const res = await callCreateUser(userCreate);
-      if (res && res.statusCode === 201) {
-        message.success('Thêm mới user thành công');
-        handleCancel();
-        fetchUser();
-      } else {
-        notification.error({
-          message: 'Đã có lỗi xảy ra',
-          description: res.message,
-        });
-      }
+      notification.error({
+        message: 'Lỗi',
+        description: res?.message || 'Có lỗi xảy ra',
+      });
     }
     setIsSubmit(false);
   };
@@ -148,93 +103,12 @@ const ModalUser = (props) => {
       onOk={() => form.submit()}
       onCancel={handleCancel}
       confirmLoading={isSubmit}
-      width={600}
+      width={700}
+      destroyOnClose
     >
-      <Form
-        form={form}
-        name="basic"
-        layout="vertical"
-        onFinish={onFinish}
-        autoComplete="off"
-      >
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[{ required: true, message: 'Vui lòng nhập email!' }]}
-        >
-          <Input disabled={!!dataInit?.id} />
-        </Form.Item>
-
-        {!dataInit?.id && (
-          <Form.Item
-            label="Mật khẩu"
-            name="password"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-          >
-            <Input.Password />
-          </Form.Item>
-        )}
-
-        {/* TÁCH 2 Ô INPUT CHO HỌ VÀ TÊN */}
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <Form.Item
-            label="Họ (Last Name)"
-            name="lastName"
-            style={{ flex: 1 }}
-            rules={[{ required: true, message: 'Vui lòng nhập họ!' }]}
-          >
-            <Input placeholder="Ví dụ: Nguyễn Văn" />
-          </Form.Item>
-
-          <Form.Item
-            label="Tên (First Name)"
-            name="firstName"
-            style={{ flex: 1 }}
-            rules={[{ required: true, message: 'Vui lòng nhập tên!' }]}
-          >
-            <Input placeholder="Ví dụ: A" />
-          </Form.Item>
-        </div>
-
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <Form.Item
-            label="Tuổi"
-            name="age"
-            style={{ flex: 1 }}
-            rules={[{ required: true, message: 'Nhập tuổi!' }]}
-          >
-            <InputNumber style={{ width: '100%' }} min={18} />
-          </Form.Item>
-
-          <Form.Item
-            label="Giới tính"
-            name="gender"
-            style={{ flex: 1 }}
-            initialValue={'MALE'}
-          >
-            <Select>
-              <Select.Option value="MALE">Nam</Select.Option>
-              <Select.Option value="FEMALE">Nữ</Select.Option>
-              <Select.Option value="OTHER">Khác</Select.Option>
-            </Select>
-          </Form.Item>
-        </div>
-
-        <Form.Item
-          label="Vai trò"
-          name="role"
-          rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
-        >
-          <Select placeholder="Chọn vai trò" allowClear options={roleOptions} />
-        </Form.Item>
-
-        <Form.Item label="Số điện thoại" name="phone">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Địa chỉ" name="address">
-          <Input />
-        </Form.Item>
+      <Form form={form} layout="vertical" onFinish={onFinish}>
+        {/* Gọi component con và truyền roleOptions vào */}
+        <UserInfoTab isEditMode={!!dataInit?.id} roleOptions={roleOptions} />
       </Form>
     </Modal>
   );

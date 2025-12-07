@@ -1,6 +1,6 @@
 import { Modal, Form, Input, InputNumber, message, notification } from 'antd';
 import { useState } from 'react';
-import { callRequestWithdraw } from '../../../services/wallet.service';
+import { callRequestWithdraw } from '../../../../services/wallet.service';
 
 const ModalWithdraw = (props) => {
   const { openModal, setOpenModal, fetchWallet, fetchTransactions } = props;

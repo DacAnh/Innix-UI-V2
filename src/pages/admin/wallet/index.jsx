@@ -1,9 +1,7 @@
-import { Card, Col, Row, Statistic, Button, Table, Tag, Space } from 'antd';
+import { Card, Col, Row, Statistic, Button, Table } from 'antd';
 import {
   WalletOutlined,
   HistoryOutlined,
-  ArrowUpOutlined,
-  ArrowDownOutlined,
   BankOutlined,
 } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
@@ -11,8 +9,13 @@ import {
   callFetchMyWallet,
   callFetchTransactions,
 } from '../../../services/wallet.service';
-import ModalWithdraw from './modal.withdraw';
+import ModalWithdraw from './components/modal.withdraw'; // Import từ module mới
 import moment from 'moment';
+import {
+  renderTransactionStatus,
+  renderTransactionType,
+  renderAmount,
+} from '../../../config/utils/render-helpers'; // Import Utils
 
 const WalletPage = () => {
   const [wallet, setWallet] = useState(null);
@@ -27,21 +30,16 @@ const WalletPage = () => {
   // Modal
   const [openModal, setOpenModal] = useState(false);
 
-  // 1. Fetch thông tin Ví (Số dư)
   const fetchWallet = async () => {
     const res = await callFetchMyWallet();
-    if (res && res.statusCode === 200) {
-      setWallet(res.data);
-    }
+    if (res?.statusCode === 200) setWallet(res.data);
   };
 
-  // 2. Fetch lịch sử giao dịch
   const fetchTransactions = async () => {
     setIsLoading(true);
-    // Sắp xếp mới nhất lên đầu (sort=createdAt,desc - tùy backend hỗ trợ)
     const query = `page=${current}&size=${pageSize}&sort=createdAt,desc`;
     const res = await callFetchTransactions(query);
-    if (res && res.statusCode === 200) {
+    if (res?.statusCode === 200) {
       setTransactions(res.data.result);
       setTotal(res.data.meta.total);
     }
@@ -51,12 +49,11 @@ const WalletPage = () => {
   useEffect(() => {
     fetchWallet();
   }, []);
-
   useEffect(() => {
     fetchTransactions();
   }, [current, pageSize]);
 
-  // Config hiển thị bảng
+  // Config Table (Dùng Utils Render)
   const columns = [
     {
       title: 'Thời gian',
@@ -67,61 +64,17 @@ const WalletPage = () => {
     {
       title: 'Loại giao dịch',
       dataIndex: 'type',
-      render: (type) => {
-        let color = 'default';
-        let icon = null;
-        if (type === 'BOOKING_REVENUE') {
-          color = 'green';
-          icon = <ArrowUpOutlined />;
-        } else if (type === 'DEPOSIT') {
-          color = 'blue';
-          icon = <ArrowUpOutlined />;
-        } else if (type === 'WITHDRAW') {
-          color = 'red';
-          icon = <ArrowDownOutlined />;
-        } else if (type === 'COMMISSION_FEE') {
-          color = 'orange';
-          icon = <ArrowDownOutlined />;
-        }
-
-        return (
-          <Tag color={color} icon={icon}>
-            {type}
-          </Tag>
-        );
-      },
+      render: (type) => renderTransactionType(type), // ✅ Dùng hàm chung
     },
     {
       title: 'Số tiền',
       dataIndex: 'amount',
-      render: (amount, record) => {
-        // Tiền vào màu xanh, tiền ra màu đỏ
-        const isPositive =
-          record.type === 'BOOKING_REVENUE' || record.type === 'DEPOSIT';
-        const color = isPositive ? '#3f8600' : '#cf1322';
-        const prefix = isPositive ? '+' : '';
-
-        return (
-          <span style={{ color: color, fontWeight: 'bold' }}>
-            {prefix}
-            {new Intl.NumberFormat('vi-VN', {
-              style: 'currency',
-              currency: 'VND',
-            }).format(amount)}
-          </span>
-        );
-      },
+      render: (amount, record) => renderAmount(amount, record.type), // ✅ Dùng hàm chung
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
-      render: (status) => {
-        let color = 'default';
-        if (status === 'SUCCESS') color = 'success';
-        if (status === 'PENDING') color = 'processing';
-        if (status === 'FAILED') color = 'error';
-        return <Tag color={color}>{status}</Tag>;
-      },
+      render: (status) => renderTransactionStatus(status), // ✅ Dùng hàm chung
     },
     {
       title: 'Mô tả',
@@ -134,7 +87,6 @@ const WalletPage = () => {
     <div>
       <div style={{ marginBottom: 20 }}>
         <Row gutter={16}>
-          {/* Card Số Dư */}
           <Col span={12}>
             <Card>
               <Statistic
@@ -159,8 +111,6 @@ const WalletPage = () => {
               </div>
             </Card>
           </Col>
-
-          {/* Card Thống kê phụ (Ví dụ: Tổng thu nhập, Đang chờ duyệt...) - Tùy chọn */}
           <Col span={12}>
             <Card>
               <Statistic
@@ -176,7 +126,6 @@ const WalletPage = () => {
         </Row>
       </div>
 
-      {/* Bảng Lịch sử */}
       <Card
         title={
           <span>

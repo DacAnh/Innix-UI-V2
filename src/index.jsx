@@ -8,7 +8,7 @@ import './index.scss';
 // Import các component chung (Layout, Loading) vẫn giữ nguyên để tải nhanh
 import BaseLayout from './components/share/layout.app';
 import LayoutAdmin from './components/admin/layout.admin';
-import ProtectedRoute from './components/share/protected-route.ts/index';
+import ProtectedRoute from './components/share/protected-route/index';
 import Loading from './components/share/loading'; // Giả sử bạn có component Loading
 
 // --- LAZY LOAD CÁC PAGE ---

@@ -4,14 +4,14 @@ import {
   callCreateAccommodation,
   callUpdateAccommodation,
   callFetchAccommodationType,
-  callFetchAmenities,
+  // callFetchAmenities,
 } from '../../../services/accommodation.service'; // Chú ý đường dẫn import
 import { callUploadFile } from '../../../services/file.service';
 
 // Import Tabs con
 import InfoTab from './tabs/InfoTab';
 import AddressTab from './tabs/AddressTab';
-import AmenitiesTab from './tabs/AmenitiesTab';
+// import AmenitiesTab from './tabs/AmenitiesTab';
 
 const ModalAccommodation = (props) => {
   const { openModal, setOpenModal, fetchData, dataInit, setDataInit } = props;
@@ -21,7 +21,7 @@ const ModalAccommodation = (props) => {
 
   // Data Sources
   const [typeOptions, setTypeOptions] = useState([]);
-  const [amenityOptions, setAmenityOptions] = useState([]);
+  // const [amenityOptions, setAmenityOptions] = useState([]);
 
   // Form States
   const [description, setDescription] = useState('');
@@ -45,15 +45,15 @@ const ModalAccommodation = (props) => {
           }))
         );
       }
-      const resAmenity = await callFetchAmenities(`page=1&size=100`);
-      if (resAmenity?.statusCode === 200) {
-        setAmenityOptions(
-          resAmenity.data.result.map((item) => ({
-            label: item.name,
-            value: item.id,
-          }))
-        );
-      }
+      // const resAmenity = await callFetchAmenities(`page=1&size=100`);
+      // if (resAmenity?.statusCode === 200) {
+      //   setAmenityOptions(
+      //     resAmenity.data.result.map((item) => ({
+      //       label: item.name,
+      //       value: item.id,
+      //     }))
+      //   );
+      // }
     };
     if (openModal) fetchPrerequisites();
   }, [openModal]);
@@ -64,9 +64,9 @@ const ModalAccommodation = (props) => {
       if (dataInit?.id) {
         // Edit Mode
         const accommodationTypeId = dataInit.type ? dataInit.type.id : null;
-        const amenityIds = dataInit.amenities
-          ? dataInit.amenities.map((a) => a.id)
-          : [];
+        // const amenityIds = dataInit.amenities
+        //   ? dataInit.amenities.map((a) => a.id)
+        //   : [];
 
         // Fill ảnh
         if (dataInit.thumbnailImageUrl) {
@@ -86,7 +86,11 @@ const ModalAccommodation = (props) => {
           setFileList([]);
         }
 
-        form.setFieldsValue({ ...dataInit, accommodationTypeId, amenityIds });
+        form.setFieldsValue({
+          ...dataInit,
+          accommodationTypeId,
+          // amenityIds
+        });
         setDescription(dataInit.description || '');
       } else {
         // Create Mode
@@ -180,7 +184,7 @@ const ModalAccommodation = (props) => {
       isPriority: values.isPriority || false,
       priorityLevel: values.priorityLevel || 0,
       autoApproveBookings: values.autoApproveBookings || false,
-      amenityIds: values.amenityIds || [],
+      // amenityIds: values.amenityIds || [],
       latitude: values.latitude || null,
       longitude: values.longitude || null,
     };
@@ -229,11 +233,11 @@ const ModalAccommodation = (props) => {
       label: `Địa chỉ`,
       children: <AddressTab />,
     },
-    {
-      key: 'amenities',
-      label: `Tiện ích`,
-      children: <AmenitiesTab amenityOptions={amenityOptions} />,
-    },
+    // {
+    //   key: 'amenities',
+    //   label: `Tiện ích`,
+    //   children: <AmenitiesTab amenityOptions={amenityOptions} />,
+    // },
   ];
 
   return (

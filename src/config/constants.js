@@ -51,7 +51,7 @@ export const ADMIN_MODULES = {
   AMENITIES: 'AMENITIES',
   WALLET: 'WALLET',
   BOOKINGS: 'BOOKINGS',
-  TRANSACTIONS: 'TRANSACTIONS',
+  ADMIN_WALLET: 'ADMIN-WALLET',
 };
 
 // === FORMAT DATE (Định dạng ngày tháng) ===
